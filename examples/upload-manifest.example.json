@@ -1,0 +1,14 @@
+{
+  "company_code": "COMPANY_A",
+  "officer_code": "OFFICER_01",
+  "document_type": "weekly_report",
+  "period": {
+    "iso_week": "2026-W35",
+    "start_date": "2026-08-24",
+    "end_date": "2026-08-30"
+  },
+  "version": 1,
+  "source": "telegram_upload",
+  "original_filename": "COMPANY_A_OFFICER_01_weekly_2026-W35_v01.html"
+}
+

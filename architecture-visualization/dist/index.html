@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="效能中心 Agent 化工作流程：從資料收集、事實核驗，到周報、月報與人才潛力信號。" />
+  <title>效能中心 Agent 化運作流程</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2307111f'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%2343d9d2' stroke-width='5'/%3E%3Cpath d='M20 32h24M32 20v24' stroke='%23f1f6fb' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #07111f;
+      --surface: #0d1a2b;
+      --surface-2: #101f33;
+      --surface-3: #152941;
+      --ink: #f1f6fb;
+      --muted: #9fb0c4;
+      --line: #27415d;
+      --cyan: #43d9d2;
+      --cyan-soft: rgba(67, 217, 210, .12);
+      --blue: #65a9ff;
+      --blue-soft: rgba(101, 169, 255, .12);
+      --amber: #ffc96b;
+      --amber-soft: rgba(255, 201, 107, .13);
+      --purple: #a78bfa;
+      --purple-soft: rgba(167, 139, 250, .13);
+      --green: #76e3a4;
+      --danger: #ff8b95;
+      --radius: 18px;
+      --shadow: 0 24px 70px rgba(0, 0, 0, .28);
+      --max: 1480px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(49, 124, 171, .16), transparent 33%),
+        radial-gradient(circle at 91% 10%, rgba(67, 217, 210, .09), transparent 28%),
+        var(--bg);
+      color: var(--ink);
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    button { font: inherit; }
+
+    .shell {
+      width: min(calc(100% - 36px), var(--max));
+      margin: 0 auto;
+      padding-bottom: 72px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      margin: 0 -18px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      background: rgba(7, 17, 31, .86);
+      border-bottom: 1px solid rgba(126, 158, 190, .18);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #051316;
+      background: linear-gradient(135deg, var(--cyan), #92f2c3);
+      box-shadow: 0 0 32px rgba(67, 217, 210, .24);
+      font-weight: 900;
+    }
+
+    .brand strong { display: block; font-size: .98rem; letter-spacing: .03em; }
+    .brand span { display: block; color: var(--muted); font-size: .76rem; }
+
+    .nav { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .nav a {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 7px 10px;
+      border-radius: 9px;
+      font-size: .82rem;
+    }
+    .nav a:hover, .nav a:focus-visible { color: var(--ink); background: var(--surface-2); outline: none; }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr);
+      gap: 24px;
+      align-items: end;
+      padding: 42px 0 26px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--cyan);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 0 5px rgba(67, 217, 210, .12);
+    }
+
+    h1 {
+      margin: 12px 0 10px;
+      max-width: 850px;
+      font-size: clamp(2rem, 4.1vw, 4rem);
+      line-height: 1.08;
+      letter-spacing: -.045em;
+    }
+
+    .lead { margin: 0; max-width: 800px; color: #bdcada; font-size: 1.06rem; }
+
+    .north-star {
+      padding: 20px 22px;
+      border: 1px solid rgba(67, 217, 210, .3);
+      border-radius: var(--radius);
+      background: linear-gradient(150deg, rgba(67, 217, 210, .11), rgba(13, 26, 43, .82));
+      box-shadow: var(--shadow);
+    }
+    .north-star small { display: block; color: var(--cyan); font-weight: 800; letter-spacing: .08em; }
+    .north-star p { margin: 8px 0 0; font-size: 1.13rem; font-weight: 700; line-height: 1.5; }
+
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+
+    .principle {
+      min-height: 116px;
+      padding: 17px 18px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: rgba(13, 26, 43, .74);
+    }
+    .principle .num { color: var(--cyan); font-weight: 900; font-size: .76rem; letter-spacing: .12em; }
+    .principle strong { display: block; margin: 5px 0 4px; }
+    .principle span { display: block; color: var(--muted); font-size: .84rem; line-height: 1.5; }
+
+    .workspace {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+      background: rgba(8, 19, 34, .78);
+      box-shadow: var(--shadow);
+    }
+
+    .workspace-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 19px 22px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(17, 33, 53, .74);
+    }
+
+    .workspace-head h2 { margin: 0; font-size: 1.05rem; }
+    .workspace-head p { margin: 3px 0 0; color: var(--muted); font-size: .8rem; }
+
+    .filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .filter {
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(7, 17, 31, .66);
+      padding: 8px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: .82rem;
+      transition: .2s ease;
+    }
+    .filter:hover { color: var(--ink); border-color: #446687; }
+    .filter[aria-pressed="true"] {
+      color: #06161a;
+      background: var(--cyan);
+      border-color: var(--cyan);
+      font-weight: 800;
+    }
+
+    .flow-canvas { padding: 26px 24px 22px; overflow-x: auto; }
+
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; color: var(--muted); font-size: .78rem; }
+    .legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .dot.source { background: var(--blue); }
+    .dot.agent { background: var(--cyan); }
+    .dot.human { background: var(--amber); }
+    .dot.output { background: var(--purple); }
+    .path-ring { width: 9px; height: 9px; border: 2px solid var(--blue); border-radius: 50%; }
+    .path-diamond { width: 8px; height: 8px; border: 2px solid var(--purple); transform: rotate(45deg); }
+
+    .flow {
+      min-width: 1100px;
+      display: grid;
+      grid-template-columns: 1fr 42px 1fr 42px 1.12fr 42px 1.1fr 42px 1fr;
+      align-items: stretch;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 320px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: linear-gradient(155deg, rgba(21, 41, 65, .93), rgba(11, 23, 39, .95));
+      cursor: pointer;
+      text-align: left;
+      color: var(--ink);
+      transition: transform .2s ease, border-color .2s ease, opacity .2s ease, box-shadow .2s ease;
+    }
+    .stage:hover { transform: translateY(-3px); border-color: #4c6e90; }
+    .stage:focus-visible { outline: 3px solid rgba(67, 217, 210, .34); outline-offset: 3px; }
+    .stage.active { border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan), 0 20px 45px rgba(0,0,0,.24); }
+
+    .stage-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .stage-index { color: var(--muted); font-size: .72rem; font-weight: 900; letter-spacing: .13em; }
+    .stage-type {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: .7rem;
+      font-weight: 800;
+    }
+    .type-source { color: var(--blue); background: var(--blue-soft); }
+    .type-agent { color: var(--cyan); background: var(--cyan-soft); }
+    .type-human { color: var(--amber); background: var(--amber-soft); }
+    .type-output { color: var(--purple); background: var(--purple-soft); }
+
+    .stage-icon {
+      width: 44px;
+      height: 44px;
+      margin: 18px 0 14px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      color: var(--cyan);
+      background: var(--cyan-soft);
+      border: 1px solid rgba(67, 217, 210, .22);
+    }
+    .stage-icon svg { width: 22px; height: 22px; stroke: currentColor; }
+    .stage h3 { margin: 0 0 6px; font-size: 1.03rem; }
+    .stage > p { margin: 0 0 14px; color: var(--muted); font-size: .81rem; min-height: 42px; }
+
+    .mini-list { display: grid; gap: 7px; }
+    .mini-item {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      padding: 7px 8px;
+      border-radius: 9px;
+      color: #c9d5e3;
+      background: rgba(5, 14, 26, .48);
+      font-size: .76rem;
+      line-height: 1.42;
+    }
+    .mini-item::before { content: ""; width: 6px; height: 6px; margin-top: 5px; flex: 0 0 auto; border-radius: 50%; background: var(--cyan); }
+    .path-result::before { width: 7px; height: 7px; background: transparent; border: 2px solid var(--blue); }
+    .path-potential::before { width: 6px; height: 6px; background: transparent; border: 2px solid var(--purple); border-radius: 1px; transform: rotate(45deg); }
+
+    .arrow { display: grid; place-items: center; color: #4e718f; }
+    .arrow svg { width: 28px; height: 28px; stroke: currentColor; }
+
+    .detail {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 24px;
+      padding: 21px 24px;
+      border-top: 1px solid var(--line);
+      background: rgba(13, 26, 43, .88);
+    }
+    .detail-kicker { color: var(--cyan); font-size: .72rem; font-weight: 900; letter-spacing: .12em; }
+    .detail h3 { margin: 5px 0 7px; font-size: 1.25rem; }
+    .detail p { margin: 0; color: #becbda; font-size: .88rem; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .detail-cell { padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(7,17,31,.45); }
+    .detail-cell small { display: block; color: var(--muted); font-size: .7rem; }
+    .detail-cell strong { display: block; margin-top: 3px; font-size: .82rem; line-height: 1.4; }
+
+    section { scroll-margin-top: 82px; }
+    .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin: 54px 0 18px; }
+    .section-head h2 { margin: 0; font-size: clamp(1.45rem, 2.6vw, 2.15rem); letter-spacing: -.025em; }
+    .section-head p { margin: 0; max-width: 580px; color: var(--muted); font-size: .9rem; }
+
+    .scenario-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .scenario {
+      position: relative;
+      min-height: 315px;
+      padding: 19px;
+      border-radius: 17px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .scenario::after {
+      content: attr(data-step);
+      position: absolute;
+      right: 12px;
+      bottom: -25px;
+      font-size: 5rem;
+      line-height: 1;
+      font-weight: 900;
+      color: rgba(255,255,255,.025);
+    }
+    .scenario-time { color: var(--cyan); font-size: .73rem; font-weight: 900; letter-spacing: .1em; }
+    .scenario h3 { margin: 10px 0 8px; font-size: 1.02rem; }
+    .scenario p { margin: 0 0 14px; color: var(--muted); font-size: .82rem; }
+    .scenario ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+    .scenario li { display: flex; gap: 9px; color: #c7d3e0; font-size: .78rem; line-height: 1.45; }
+    .scenario li::before { content: "✓"; color: var(--green); font-weight: 900; }
+
+    .decision-band {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: center;
+      padding: 22px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 201, 107, .27);
+      background: linear-gradient(100deg, rgba(255, 201, 107, .1), rgba(167, 139, 250, .08));
+    }
+    .decision-band strong { display: block; margin-bottom: 4px; }
+    .decision-band span { color: var(--muted); font-size: .83rem; }
+    .decision-arrow { color: var(--amber); font-weight: 900; font-size: 1.4rem; }
+
+    .supervisor-board {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      overflow: hidden;
+      background:
+        linear-gradient(145deg, rgba(19, 40, 64, .92), rgba(8, 19, 34, .97)),
+        var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .supervisor-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 22px;
+      padding: 21px 24px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(8, 18, 32, .5);
+    }
+    .supervisor-head h2 { margin: 0; font-size: 1.12rem; }
+    .supervisor-head p { margin: 3px 0 0; color: var(--muted); font-size: .82rem; }
+    .supervisor-status { display: flex; gap: 8px; flex-wrap: wrap; }
+    .supervisor-status span { padding: 6px 9px; border-radius: 999px; color: #cbd8e5; background: rgba(255,255,255,.05); font-size: .72rem; }
+
+    .command-row {
+      display: grid;
+      grid-template-columns: minmax(180px, .8fr) 44px minmax(320px, 1.4fr) 44px minmax(190px, .85fr);
+      gap: 10px;
+      align-items: stretch;
+      padding: 24px;
+    }
+    .command-arrow { display: grid; place-items: center; color: #5b7a99; font-size: 1.4rem; font-weight: 900; }
+    .command-node {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(8, 18, 32, .7);
+    }
+    .command-node small { display: block; color: var(--muted); font-size: .7rem; font-weight: 900; letter-spacing: .1em; }
+    .command-node strong { display: block; margin: 6px 0 5px; font-size: 1rem; }
+    .command-node p { margin: 0; color: var(--muted); font-size: .78rem; }
+    .command-node.core {
+      position: relative;
+      border-color: rgba(67, 217, 210, .62);
+      background: linear-gradient(145deg, rgba(67, 217, 210, .17), rgba(10, 25, 40, .95));
+      box-shadow: 0 0 0 1px rgba(67, 217, 210, .12), 0 18px 45px rgba(0,0,0,.23);
+    }
+    .command-node.core::after {
+      content: "SUPERVISOR";
+      position: absolute;
+      right: 14px;
+      top: 13px;
+      color: var(--cyan);
+      font-size: .62rem;
+      font-weight: 900;
+      letter-spacing: .11em;
+    }
+    .command-node.core strong { color: var(--cyan); font-size: 1.17rem; }
+    .command-node.batch { border-color: rgba(167,139,250,.34); background: rgba(167,139,250,.08); }
+
+    .fanout {
+      position: relative;
+      height: 32px;
+      margin: 0 46px;
+      border-top: 1px solid #385675;
+    }
+    .fanout::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -32px;
+      height: 32px;
+      border-left: 1px solid #385675;
+    }
+    .fanout::after {
+      content: "專業任務分派";
+      position: absolute;
+      left: 50%;
+      top: -15px;
+      transform: translateX(-50%);
+      padding: 3px 9px;
+      color: var(--muted);
+      background: #0c1b2d;
+      font-size: .68rem;
+      letter-spacing: .08em;
+    }
+
+    .specialist-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 11px;
+      padding: 0 24px 20px;
+    }
+    .specialist-node {
+      min-height: 132px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--ink);
+      background: rgba(10, 23, 39, .88);
+      text-align: left;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+    .specialist-node:hover { transform: translateY(-2px); border-color: #4d6f90; }
+    .specialist-node:focus-visible { outline: 3px solid rgba(67,217,210,.3); outline-offset: 2px; }
+    .specialist-node.active { border-color: var(--cyan); background: var(--cyan-soft); }
+    .specialist-node small { display: block; color: var(--cyan); font-size: .65rem; font-weight: 900; letter-spacing: .08em; }
+    .specialist-node strong { display: block; margin: 7px 0 4px; font-size: .88rem; }
+    .specialist-node span { display: block; color: var(--muted); font-size: .72rem; line-height: 1.45; }
+
+    .specialist-detail {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      margin: 0 24px 22px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--line);
+    }
+    .specialist-detail > div { padding: 13px 15px; background: rgba(7,17,31,.88); }
+    .specialist-detail small { display: block; color: var(--muted); font-size: .68rem; }
+    .specialist-detail strong { display: block; margin-top: 3px; font-size: .79rem; line-height: 1.45; }
+
+    .assurance-flow {
+      display: grid;
+      grid-template-columns: 1fr 34px 1.15fr 34px 1fr 34px 1fr;
+      align-items: stretch;
+      gap: 7px;
+      padding: 22px 24px 24px;
+      border-top: 1px solid var(--line);
+      background: rgba(6, 15, 27, .5);
+    }
+    .assurance-step { padding: 15px; border: 1px solid var(--line); border-radius: 14px; background: rgba(14,29,48,.9); }
+    .assurance-step small { display: block; color: var(--muted); font-size: .65rem; font-weight: 900; letter-spacing: .09em; }
+    .assurance-step strong { display: block; margin: 5px 0 4px; font-size: .86rem; }
+    .assurance-step p { margin: 0; color: var(--muted); font-size: .72rem; }
+    .assurance-step.audit { border-color: rgba(67,217,210,.42); }
+    .assurance-step.output { border-color: rgba(167,139,250,.4); }
+    .assurance-step.human { border-color: rgba(255,201,107,.45); }
+    .triage-lights { display: flex; gap: 5px; margin-top: 9px; }
+    .triage-lights span { padding: 3px 6px; border-radius: 999px; color: #07111f; font-size: .62rem; font-weight: 900; }
+    .triage-lights .green { background: var(--green); }
+    .triage-lights .yellow { background: var(--amber); }
+    .triage-lights .red { background: var(--danger); }
+
+    .agent-map {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 13px;
+    }
+    .agent-card {
+      position: relative;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: linear-gradient(160deg, rgba(18, 37, 59, .97), rgba(9, 21, 36, .98));
+    }
+    .agent-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 20px;
+      bottom: 20px;
+      width: 3px;
+      border-radius: 3px;
+      background: var(--cyan);
+    }
+    .agent-card.output::before { background: var(--purple); }
+    .agent-card.guard::before { background: var(--cyan); }
+    .agent-card small { color: var(--muted); font-size: .7rem; font-weight: 800; letter-spacing: .1em; }
+    .agent-card h3 { margin: 7px 0 6px; font-size: 1rem; }
+    .agent-card p { margin: 0; color: var(--muted); font-size: .8rem; }
+    .agent-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .agent-tags span { padding: 5px 8px; border-radius: 8px; background: rgba(255,255,255,.045); color: #cbd7e4; font-size: .7rem; }
+
+    .roles-scroll { max-width: 100%; overflow-x: auto; border-radius: 18px; }
+    .roles {
+      display: grid;
+      grid-template-columns: 210px repeat(4, 1fr);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .role-cell { padding: 16px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); min-height: 90px; }
+    .role-cell:nth-child(5n) { border-right: 0; }
+    .role-cell:nth-last-child(-n+5) { border-bottom: 0; }
+    .role-head { color: var(--muted); font-size: .75rem; font-weight: 900; letter-spacing: .08em; background: rgba(16,31,51,.9); min-height: auto; }
+    .role-name { font-weight: 900; }
+    .role-name span { display: block; margin-top: 4px; color: var(--muted); font-size: .75rem; font-weight: 400; }
+    .role-cell p { margin: 0; color: #c4d0dd; font-size: .78rem; }
+    .role-cell em { color: var(--cyan); font-style: normal; font-weight: 800; }
+
+    .rollout {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 13px;
+    }
+    .phase { padding: 22px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); }
+    .phase-label { display: flex; align-items: center; justify-content: space-between; color: var(--cyan); font-size: .74rem; font-weight: 900; letter-spacing: .1em; }
+    .phase-label span:last-child { color: var(--muted); letter-spacing: 0; }
+    .phase h3 { margin: 12px 0 7px; font-size: 1.05rem; }
+    .phase p { margin: 0; color: var(--muted); font-size: .82rem; }
+    .phase-outcome { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); color: #d2dce7; font-size: .78rem; }
+
+    .guardrail {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 20px 22px;
+      border: 1px solid rgba(255, 139, 149, .28);
+      border-radius: 16px;
+      background: rgba(255, 139, 149, .07);
+    }
+    .guardrail-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; color: var(--danger); background: rgba(255,139,149,.12); font-weight: 900; }
+    .guardrail strong { display: block; }
+    .guardrail p { margin: 3px 0 0; color: #c7d1dd; font-size: .83rem; }
+
+    footer { margin-top: 45px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: .76rem; display: flex; justify-content: space-between; gap: 16px; }
+
+    @media (max-width: 1120px) {
+      .scenario-grid { grid-template-columns: repeat(2, 1fr); }
+      .scenario:last-child { grid-column: span 2; min-height: auto; }
+      .agent-map { grid-template-columns: repeat(2, 1fr); }
+      .specialist-grid { grid-template-columns: repeat(2, 1fr); }
+      .roles { min-width: 940px; grid-template-columns: 180px repeat(4, minmax(180px, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .shell { width: min(calc(100% - 22px), var(--max)); }
+      .topbar { margin: 0 -11px; padding: 12px 11px; }
+      .brand span, .nav { display: none; }
+      .intro { grid-template-columns: 1fr; padding-top: 28px; }
+      .principles { grid-template-columns: repeat(2, 1fr); }
+      .workspace-head, .section-head { align-items: flex-start; flex-direction: column; }
+      .supervisor-head { align-items: flex-start; flex-direction: column; }
+      .command-row { grid-template-columns: 1fr; }
+      .command-arrow { transform: rotate(90deg); }
+      .fanout { display: none; }
+      .specialist-grid { grid-template-columns: 1fr; padding-top: 4px; }
+      .specialist-detail { grid-template-columns: 1fr; }
+      .assurance-flow { grid-template-columns: 1fr; }
+      .assurance-flow .command-arrow { display: block !important; transform: rotate(90deg); text-align: center; }
+      .detail { grid-template-columns: 1fr; }
+      .scenario-grid, .agent-map, .rollout { grid-template-columns: 1fr; }
+      .scenario:last-child { grid-column: auto; }
+      .decision-band { grid-template-columns: 1fr; }
+      .decision-arrow { transform: rotate(90deg); width: fit-content; }
+      .roles { min-width: 900px; }
+      footer { flex-direction: column; }
+    }
+
+    @media print {
+      :root { --bg: #fff; --surface: #fff; --surface-2: #f4f7fa; --surface-3: #eef4f8; --ink: #102033; --muted: #536477; --line: #ced8e1; }
+      body { background: #fff; }
+      .topbar { position: static; background: #fff; }
+      .filters { display: none; }
+      .workspace, .north-star { box-shadow: none; }
+      .flow-canvas { overflow: visible; zoom: .72; }
+      section { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">效</div>
+        <div><strong>效能中心 Agent OS</strong><span>事實自動沉澱 · 人工只處理例外</span></div>
+      </div>
+      <nav class="nav" aria-label="頁面導覽">
+        <a href="#supervisor">總管架構</a>
+        <a href="#flow">端到端流程</a>
+        <a href="#scenarios">使用場景</a>
+        <a href="#agents">專業 Agent</a>
+        <a href="#roles">角色協作</a>
+        <a href="#rollout">導入路徑</a>
+      </nav>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <div class="eyebrow"><span class="pulse"></span>Operating model</div>
+        <h1 id="page-title">讓報告成為資料的結果，<br>而不是人的重複工作。</h1>
+        <p class="lead">人才評估總管 Agent 建立批次、分派任務並監察完整性；專業 Agent 分別處理資料、貢獻、能力與潛力。所有輸出共用同一套事實帳本，效能官只確認系統無法判斷的例外。</p>
+      </div>
+      <aside class="north-star">
+        <small>目標狀態</small>
+        <p>員工不額外填報，效能官不從零寫報告；管理者看到的每一項結論，都能回到原始任務、驗收或結果證據。</p>
+      </aside>
+    </section>
+
+    <div class="principles" aria-label="核心原則">
+      <div class="principle"><div class="num">01</div><strong>一套事實帳本</strong><span>人員、項目、任務、日期、角色與證據都有唯一識別。</span></div>
+      <div class="principle"><div class="num">02</div><strong>一位總管、多類專職</strong><span>總管負責分工與監察，專業 Agent 各自處理有邊界的任務。</span></div>
+      <div class="principle"><div class="num">03</div><strong>人工只看例外</strong><span>正常事項自動通過；衝突、缺證或歸屬不明才送審。</span></div>
+      <div class="principle"><div class="num">04</div><strong>可追溯、不猜測</strong><span>沒有足夠證據時輸出「無法判斷」，不自動補出人才結論。</span></div>
+    </div>
+
+    <section id="supervisor" class="supervisor-board" aria-labelledby="supervisor-title">
+      <div class="supervisor-head">
+        <div><h2 id="supervisor-title">人才評估總管架構</h2><p>總管不直接評價員工；它管理批次、任務依賴、證據完整性、衝突與人工升級。</p></div>
+        <div class="supervisor-status" aria-label="總管監察項目"><span>批次狀態</span><span>材料完整率</span><span>待確認異常</span><span>規則版本</span></div>
+      </div>
+
+      <div class="command-row">
+        <article class="command-node">
+          <small>GOVERNANCE OWNER</small>
+          <strong>人才評估負責人</strong>
+          <p>設定評估期間、適用規則、排除對象與最終決策權限。</p>
+        </article>
+        <div class="command-arrow" aria-hidden="true">→</div>
+        <article class="command-node core">
+          <small>ORCHESTRATION LAYER</small>
+          <strong>人才評估總管 Agent</strong>
+          <p>建立評估批次、確認應收材料、切分任務、指派專業 Agent、追蹤進度、管理衝突並決定自動通過或人工升級。</p>
+        </article>
+        <div class="command-arrow" aria-hidden="true">→</div>
+        <article class="command-node batch">
+          <small>BATCH CONTROL</small>
+          <strong>評估批次控制台</strong>
+          <p>顯示已完成、缺資料、待補證、歸屬衝突及人工待辦。</p>
+        </article>
+      </div>
+
+      <div class="fanout" aria-hidden="true"></div>
+
+      <div class="specialist-grid" aria-label="專業Agent任務分工">
+        <button class="specialist-node active" aria-pressed="true" data-specialist="collection"><small>01 · COLLECTION</small><strong>資料收集 Agent</strong><span>材料齊全、日期與周次、來源追蹤</span></button>
+        <button class="specialist-node" aria-pressed="false" data-specialist="identity"><small>02 · IDENTITY</small><strong>身份歸檔 Agent</strong><span>姓名別名、公司歸屬、暫代與異動</span></button>
+        <button class="specialist-node" aria-pressed="false" data-specialist="dedupe"><small>03 · DEDUPLICATION</small><strong>項目去重 Agent</strong><span>跨周、跨月、跨來源識別同一項目</span></button>
+        <button class="specialist-node" aria-pressed="false" data-specialist="contribution"><small>04 · CONTRIBUTION</small><strong>貢獻核驗 Agent</strong><span>角色、交付、驗收與實際成果證據</span></button>
+        <button class="specialist-node" aria-pressed="false" data-specialist="capability"><small>05 · CAPABILITY</small><strong>能力邊界 Agent</strong><span>已驗證能力、支持程度與穩定性</span></button>
+        <button class="specialist-node" aria-pressed="false" data-specialist="potential"><small>06 · POTENTIAL</small><strong>潛力信號 Agent</strong><span>學習速度、獨立性與跨場景遷移</span></button>
+        <button class="specialist-node" aria-pressed="false" data-specialist="audit"><small>07 · INDEPENDENT REVIEW</small><strong>獨立審核 Agent</strong><span>規則一致、證據充分、結論可追溯</span></button>
+        <button class="specialist-node" aria-pressed="false" data-specialist="output"><small>08 · OUTPUT</small><strong>報告生成 Agent</strong><span>評估表、變化說明與管理摘要</span></button>
+      </div>
+
+      <div class="specialist-detail" aria-live="polite">
+        <div><small id="specialist-current">資料收集 Agent · 接收任務</small><strong id="specialist-input">評估期間內的應收清單、上傳文件與系統來源</strong></div>
+        <div><small>完成條件</small><strong id="specialist-done">每份材料都有公司、人員、日期、周次及來源狀態</strong></div>
+        <div><small>升級總管</small><strong id="specialist-escalation">缺檔、日期衝突、無法判斷所屬周次或來源失效</strong></div>
+      </div>
+
+      <div class="assurance-flow" aria-label="審核與人工決策流程">
+        <article class="assurance-step audit"><small>QUALITY GATE</small><strong>獨立審核</strong><p>檢查專業 Agent 結論是否有證據、是否符合規則。</p></article>
+        <div class="command-arrow" aria-hidden="true">→</div>
+        <article class="assurance-step"><small>RISK ROUTING</small><strong>紅黃綠分流</strong><p>依證據完整性、衝突與敏感度決定處理路徑。</p><div class="triage-lights"><span class="green">自動歸檔</span><span class="yellow">效能官確認</span><span class="red">管理者決策</span></div></article>
+        <div class="command-arrow" aria-hidden="true">→</div>
+        <article class="assurance-step output"><small>MANAGEMENT OUTPUT</small><strong>人才評估輸出</strong><p>事實底稿、能力變化、潛力信號與爭議清單。</p></article>
+        <div class="command-arrow" aria-hidden="true">→</div>
+        <article class="assurance-step human"><small>FINAL AUTHORITY</small><strong>人工最終校準</strong><p>人才等級、敏感結論及後續發展決策由人負責。</p></article>
+      </div>
+    </section>
+
+    <section id="flow" class="workspace" aria-labelledby="flow-title">
+      <div class="workspace-head">
+        <div><h2 id="flow-title">端到端運作流程</h2><p>點選任一節點查看輸入、處理、輸出與人工介入方式。</p></div>
+        <div class="filters" role="group" aria-label="流程路徑篩選">
+          <button class="filter" data-filter="all" aria-pressed="true">完整流程</button>
+          <button class="filter" data-filter="result" aria-pressed="false">成果產出</button>
+          <button class="filter" data-filter="potential" aria-pressed="false">人才潛力</button>
+        </div>
+      </div>
+
+      <div class="flow-canvas">
+        <div class="legend" aria-label="圖例">
+          <span><i class="dot source"></i>系統資料源</span>
+          <span><i class="dot agent"></i>Agent 自動處理</span>
+          <span><i class="dot human"></i>人工決策點</span>
+          <span><i class="dot output"></i>管理輸出</span>
+          <span><i class="path-ring"></i>成果產出路徑</span>
+          <span><i class="path-diamond"></i>人才潛力路徑</span>
+        </div>
+
+        <div class="flow">
+          <article class="stage active" role="button" tabindex="0" aria-pressed="true" data-stage="source" data-path="result potential">
+            <div class="stage-top"><span class="stage-index">STAGE 01</span><span class="stage-type type-source">資料源</span></div>
+            <span class="stage-icon" aria-hidden="true"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path d="M4 6.5C4 5.12 7.58 4 12 4s8 1.12 8 2.5S16.42 9 12 9 4 7.88 4 6.5Z"/><path d="M4 6.5v5C4 12.88 7.58 14 12 14s8-1.12 8-2.5v-5M4 11.5v5C4 17.88 7.58 19 12 19s8-1.12 8-2.5v-5"/></svg></span>
+            <h3>工作自然產生資料</h3>
+            <p>不新增填報動作，直接使用日常系統留下的紀錄。</p>
+            <div class="mini-list">
+              <span class="mini-item path-result">項目管理、Git、測試、驗收、上線</span>
+              <span class="mini-item path-result">產品與業務結果資料</span>
+              <span class="mini-item path-potential">既有周報、月報與人員確認表</span>
+            </div>
+          </article>
+          <div class="arrow" aria-hidden="true"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path d="M5 12h14M14 7l5 5-5 5"/></svg></div>
+
+          <article class="stage" role="button" tabindex="0" aria-pressed="false" data-stage="ingest" data-path="result potential">
+            <div class="stage-top"><span class="stage-index">STAGE 02</span><span class="stage-type type-agent">Agent</span></div>
+            <span class="stage-icon" aria-hidden="true"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 15v4h14v-4"/></svg></span>
+            <h3>接入、解析與身份統一</h3>
+            <p>把不同格式轉為統一事件，並處理別名與日期。</p>
+            <div class="mini-list">
+              <span class="mini-item path-result">解析 Excel、HTML、Word、API</span>
+              <span class="mini-item path-result">日期與周次雙重確認</span>
+              <span class="mini-item path-potential">人名／項目別名與暫代關係</span>
+            </div>
+          </article>
+          <div class="arrow" aria-hidden="true"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path d="M5 12h14M14 7l5 5-5 5"/></svg></div>
+
+          <article class="stage" role="button" tabindex="0" aria-pressed="false" data-stage="ledger" data-path="result potential">
+            <div class="stage-top"><span class="stage-index">STAGE 03</span><span class="stage-type type-agent">Agent 產出</span></div>
+            <span class="stage-icon" aria-hidden="true"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h6"/></svg></span>
+            <h3>建立可追溯事實帳本</h3>
+            <p>每一項成果都連結到人、項目、時間、角色與證據。</p>
+            <div class="mini-list">
+              <span class="mini-item path-result">項目狀態與成果事件</span>
+              <span class="mini-item path-result">跨周／跨月去重與版本軌跡</span>
+              <span class="mini-item path-potential">個人能力證據與支持程度</span>
+            </div>
+          </article>
+          <div class="arrow" aria-hidden="true"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path d="M5 12h14M14 7l5 5-5 5"/></svg></div>
+
+          <article class="stage" role="button" tabindex="0" aria-pressed="false" data-stage="compare" data-path="result potential">
+            <div class="stage-top"><span class="stage-index">STAGE 04</span><span class="stage-type type-agent">Agent</span></div>
+            <span class="stage-icon" aria-hidden="true"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path d="m4 7 4-4 4 4M8 3v12M20 17l-4 4-4-4m4 4V9"/></svg></span>
+            <h3>總管分派與專業分析</h3>
+            <p>總管切分任務、監察依賴；專業 Agent 只處理各自範圍。</p>
+            <div class="mini-list">
+              <span class="mini-item path-result">項目去重、貢獻核驗與結果比對</span>
+              <span class="mini-item path-result">完成、延誤、重複、衝突與缺證</span>
+              <span class="mini-item path-potential">能力邊界、學習速度與遷移信號</span>
+            </div>
+          </article>
+          <div class="arrow" aria-hidden="true"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path d="M5 12h14M14 7l5 5-5 5"/></svg></div>
+
+          <article class="stage" role="button" tabindex="0" aria-pressed="false" data-stage="decision" data-path="result potential">
+            <div class="stage-top"><span class="stage-index">STAGE 05</span><span class="stage-type type-human">人機協作</span></div>
+            <span class="stage-icon" aria-hidden="true"><svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path d="M9 11l2 2 4-5"/><path d="M5 4h14v16H5z"/><path d="M8 4V2m8 2V2"/></svg></span>
+            <h3>獨立審核、分流與輸出</h3>
+            <p>綠色自動歸檔、黃色效能官確認、紅色交管理者決策。</p>
+            <div class="mini-list">
+              <span class="mini-item path-result">周報、月度變化與管理摘要</span>
+              <span class="mini-item path-potential">能力檔案與潛力信號</span>
+              <span class="mini-item path-potential">季度人才校準材料</span>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="detail" aria-live="polite">
+        <div>
+          <div class="detail-kicker" id="detail-kicker">STAGE 01 · 系統資料源</div>
+          <h3 id="detail-title">工作自然產生資料</h3>
+          <p id="detail-copy">員工照常使用項目、開發、測試與驗收工具。系統讀取既有紀錄，不要求另外填寫一份「給效能中心的資料」。過渡期仍會讀取既有周報與月報，作為交叉核驗來源。</p>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-cell"><small>輸入</small><strong id="detail-input">任務、提交、驗收、上線與結果紀錄</strong></div>
+          <div class="detail-cell"><small>輸出</small><strong id="detail-output">帶來源與時間的原始事件</strong></div>
+          <div class="detail-cell"><small>人工動作</small><strong id="detail-human">無額外動作</strong></div>
+          <div class="detail-cell"><small>控制原則</small><strong id="detail-control">保留原始連結，不覆蓋來源資料</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="scenarios" aria-labelledby="scenario-title">
+      <div class="section-head">
+        <div><div class="eyebrow">Use cases</div><h2 id="scenario-title">五個實際使用場景</h2></div>
+        <p>從每周成果整理一路延伸到季度人才校準；每個周期只新增變化，不重複建立同一份事實。</p>
+      </div>
+      <div class="scenario-grid">
+        <article class="scenario" data-step="1"><div class="scenario-time">每周 · 自動</div><h3>周報生成</h3><p>整理當周新增、延續、完成、延期與風險。</p><ul><li>日期與周次交叉檢查</li><li>比對項目系統與既有周報</li><li>只推送衝突與缺證事項</li></ul></article>
+        <article class="scenario" data-step="2"><div class="scenario-time">月末 · 自動</div><h3>月度成果歸整</h3><p>由已確認的周度事件累積，不重新填寫。</p><ul><li>合併跨周重複項目</li><li>辨識本月新增結果</li><li>區分業務成果與效能推動</li></ul></article>
+        <article class="scenario" data-step="3"><div class="scenario-time">事件觸發</div><h3>能力檔案更新</h3><p>新能力經交付與驗收後，形成能力變更建議。</p><ul><li>記錄支持程度與完成品質</li><li>一次驗證不等於穩定能力</li><li>第二場景成功後提高證據強度</li></ul></article>
+        <article class="scenario" data-step="4"><div class="scenario-time">每月 · 信號</div><h3>潛力趨勢觀察</h3><p>從多次學習與遷移事件觀察，不依賴主觀形容。</p><ul><li>學習到獨立交付所需時間</li><li>支持依賴是否下降</li><li>跨場景遷移與成果複用</li></ul></article>
+        <article class="scenario" data-step="5"><div class="scenario-time">隨時 · 查詢</div><h3>管理追溯</h3><p>任何結論都能回看原始任務、驗收與時間。</p><ul><li>解釋能力判斷的證據</li><li>找出缺少佐證的評價</li><li>回答項目是否重複申報</li></ul></article>
+      </div>
+
+      <div class="decision-band">
+        <div><strong>系統可以自動完成</strong><span>資料擷取、日期換算、周次確認、項目去重、差異辨識、證據串接與草稿生成。</span></div>
+        <div class="decision-arrow" aria-hidden="true">→</div>
+        <div><strong>人保留最終判斷</strong><span>歸屬爭議、敏感負面評價、人才定級、潛力結論與重大管理處置。</span></div>
+      </div>
+    </section>
+
+    <section id="agents" aria-labelledby="agent-title">
+      <div class="section-head">
+        <div><div class="eyebrow">Specialist functions</div><h2 id="agent-title">專業 Agent 功能清單</h2></div>
+        <p>每個 Agent 都有固定輸入、完成條件與升級規則；總管只負責調度與監察，不代替專業分析或人工決策。</p>
+      </div>
+      <div class="agent-map">
+        <article class="agent-card"><small>01 · COLLECTION</small><h3>資料收集 Agent</h3><p>檢查確認表、周報、月報與系統來源是否齊全，辨識日期及所屬周次。</p><div class="agent-tags"><span>收件狀態</span><span>日期周次</span><span>來源追蹤</span></div></article>
+        <article class="agent-card"><small>02 · IDENTITY</small><h3>身份歸檔 Agent</h3><p>統一姓名、公司、職位與暫代關係，處理姓名別名、不同拼寫及人員異動。</p><div class="agent-tags"><span>人員 ID</span><span>別名表</span><span>異動關係</span></div></article>
+        <article class="agent-card"><small>03 · DEDUPLICATION</small><h3>項目去重 Agent</h3><p>判斷不同周次、月份或名稱下是否為同一項目，保留完整狀態軌跡。</p><div class="agent-tags"><span>跨周去重</span><span>跨月去重</span><span>版本軌跡</span></div></article>
+        <article class="agent-card"><small>04 · CONTRIBUTION</small><h3>貢獻核驗 Agent</h3><p>核對主責、核心實現、協作與交付角色，要求任務、驗收或結果證據。</p><div class="agent-tags"><span>角色歸屬</span><span>交付事實</span><span>證據鏈</span></div></article>
+        <article class="agent-card"><small>05 · CAPABILITY</small><h3>能力邊界 Agent</h3><p>把完成的新難度工作更新為已驗證能力，區分一次證明與穩定承擔。</p><div class="agent-tags"><span>能力標籤</span><span>支持程度</span><span>穩定性</span></div></article>
+        <article class="agent-card"><small>06 · POTENTIAL</small><h3>潛力信號 Agent</h3><p>從多次學習、獨立交付與跨場景遷移觀察趨勢，不直接給人才等級。</p><div class="agent-tags"><span>學習速度</span><span>獨立性</span><span>跨場景遷移</span></div></article>
+        <article class="agent-card guard"><small>07 · INDEPENDENT REVIEW</small><h3>獨立審核 Agent</h3><p>檢查資料、規則與結論是否一致，發現相互矛盾或缺少佐證的判斷。</p><div class="agent-tags"><span>交叉驗證</span><span>規則一致</span><span>衝突清單</span></div></article>
+        <article class="agent-card output"><small>08 · OUTPUT</small><h3>報告生成 Agent</h3><p>根據已確認事實產生評估表、能力變化、潛力摘要與待決策事項。</p><div class="agent-tags"><span>評估表</span><span>管理摘要</span><span>人工待辦</span></div></article>
+      </div>
+    </section>
+
+    <section id="roles" aria-labelledby="role-title">
+      <div class="section-head">
+        <div><div class="eyebrow">Human in the loop</div><h2 id="role-title">角色如何協作</h2></div>
+        <p>真正要減少的是重複文字，而不是取消必要的管理責任。</p>
+      </div>
+      <div class="roles-scroll" role="region" aria-label="角色協作矩陣，可水平捲動" tabindex="0">
+      <div class="roles">
+        <div class="role-cell role-head">角色</div><div class="role-cell role-head">平時工作</div><div class="role-cell role-head">每周</div><div class="role-cell role-head">每月</div><div class="role-cell role-head">每季</div>
+        <div class="role-cell role-name">員工<span>事實產生者</span></div><div class="role-cell"><p>正常使用項目、開發、測試與驗收工具。</p></div><div class="role-cell"><p><em>不額外填報</em></p></div><div class="role-cell"><p>必要時確認個人歸屬爭議。</p></div><div class="role-cell"><p>可查看與申訴個人證據。</p></div>
+        <div class="role-cell role-name">效能官<span>例外確認者</span></div><div class="role-cell"><p>管理項目與推動事項。</p></div><div class="role-cell"><p>處理少量衝突、缺證與歸屬問題。</p></div><div class="role-cell"><p><em>不重寫月報</em>，只確認新增變化。</p></div><div class="role-cell"><p>補充必要管理情境。</p></div>
+        <div class="role-cell role-name">管理者／人才評審<span>最終決策者</span></div><div class="role-cell"><p>定義目標、權限與判斷規則。</p></div><div class="role-cell"><p>查看重大風險與待決策事項。</p></div><div class="role-cell"><p>查看能力變化與證據充分度。</p></div><div class="role-cell"><p><em>完成人才校準</em>與發展決策。</p></div>
+      </div>
+      </div>
+    </section>
+
+    <section id="rollout" aria-labelledby="rollout-title">
+      <div class="section-head">
+        <div><div class="eyebrow">Rollout</div><h2 id="rollout-title">建議導入路徑</h2></div>
+        <p>先把事實層做準，再連接各公司系統，最後才加入能力與潛力信號。</p>
+      </div>
+      <div class="rollout">
+        <article class="phase"><div class="phase-label"><span>PHASE 01</span><span>現有材料先跑通</span></div><h3>總管批次＋事實帳本</h3><p>以現有 Excel、HTML、Word、周報及月報建立評估批次，完成姓名、項目、日期與周次標準化。</p><div class="phase-outcome">產出：總管控制台、應收清單與可追溯資料底座。</div></article>
+        <article class="phase"><div class="phase-label"><span>PHASE 02</span><span>專業任務自動化</span></div><h3>項目、貢獻與獨立審核 Agent</h3><p>上線項目去重、貢獻核驗及獨立審核，並逐步連接各公司的項目與交付系統。</p><div class="phase-outcome">產出：自動比對、紅黃綠分流、異常待辦與月度變化。</div></article>
+        <article class="phase"><div class="phase-label"><span>PHASE 03</span><span>形成管理閉環</span></div><h3>能力、潛力與人工校準</h3><p>從多周期事實更新能力邊界與潛力信號，最終由管理者完成人才校準及發展決策。</p><div class="phase-outcome">產出：滾動能力檔案、潛力趨勢與可追溯評審材料。</div></article>
+      </div>
+      <div class="guardrail">
+        <div class="guardrail-icon">!</div>
+        <div><strong>核心治理邊界</strong><p>任務數、工時、提交量不能直接轉成人才分數；單次高難度交付只更新已驗證能力。潛力必須來自多次學習、獨立交付與跨場景遷移，而且保留人工最終判斷。</p></div>
+      </div>
+    </section>
+
+    <footer><span>效能中心人才評估 Agent 架構</span><span>總管負責分工監察 · 專業 Agent 負責分析 · 人保留最終決策</span></footer>
+  </main>
+
+  <script>
+    const stages = {
+      source: {
+        kicker: 'STAGE 01 · 系統資料源', title: '工作自然產生資料',
+        copy: '員工照常使用項目、開發、測試與驗收工具。系統讀取既有紀錄，不要求另外填寫一份「給效能中心的資料」。過渡期仍會讀取既有周報與月報，作為交叉核驗來源。',
+        input: '任務、提交、驗收、上線與結果紀錄', output: '帶來源與時間的原始事件', human: '無額外動作', control: '保留原始連結，不覆蓋來源資料'
+      },
+      ingest: {
+        kicker: 'STAGE 02 · 接入與解析', title: '將不同格式轉成同一種語言',
+        copy: '資料收集 Agent 解析 API、Excel、Word 與 HTML；身份歸檔 Agent 統一人名、項目名與任務名。日期和周次分別計算再核對，降低歸錯周期的風險。',
+        input: '原始文件、系統欄位、組織與別名表', output: '標準化人員、項目與工作事件', human: '只處理無法辨識的新別名', control: '不確定項目保留候選值與信心度'
+      },
+      ledger: {
+        kicker: 'STAGE 03 · 事實帳本', title: '讓每項結論都有證據鏈',
+        copy: '統一帳本記錄「誰、在什麼項目、何時、以什麼角色、完成什麼、由什麼證據支持」。同一項目跨周只更新狀態，不再每月複製一份新資料。',
+        input: '標準化工作事件', output: '項目軌跡、貢獻事件與能力證據', human: '通常無需處理', control: '唯一 ID、版本紀錄與來源時間戳'
+      },
+      compare: {
+        kicker: 'STAGE 04 · 總管與專業分析', title: '總管分派、專業 Agent 分工',
+        copy: '人才評估總管 Agent 依批次、公司、人員與資料依賴切分任務，專業 Agent 分別完成項目去重、貢獻核驗、能力邊界與潛力信號。總管只監察完整性與衝突，不直接評價員工。',
+        input: '評估批次、事實帳本、規則版本與任務依賴', output: '專業分析結果、衝突與待補證清單', human: '只有低信心或敏感事項才介入', control: '每個 Agent 有固定輸入、完成條件與升級規則'
+      },
+      decision: {
+        kicker: 'STAGE 05 · 審核、分流與輸出', title: '綠色自動、黃色確認、紅色決策',
+        copy: '獨立審核 Agent 檢查證據和規則一致性。總管依風險分流：完整且一致的事項自動歸檔，低信心事項交效能官確認，敏感結論與人才定級交管理者決策。',
+        input: '專業 Agent 結果、衝突與審核意見', output: '評估表、能力變化、潛力信號與管理待辦', human: '效能官確認例外；管理者完成人才校準', control: '所有確認、修改與模型版本均保留審計紀錄'
+      }
+    };
+
+    const specialists = {
+      collection: {
+        name: '資料收集 Agent',
+        input: '評估期間內的應收清單、上傳文件與系統來源',
+        done: '每份材料都有公司、人員、日期、周次及來源狀態',
+        escalation: '缺檔、日期衝突、無法判斷所屬周次或來源失效'
+      },
+      identity: {
+        name: '身份歸檔 Agent',
+        input: '人員名冊、公司關係、別名與歷史異動',
+        done: '每個姓名都對應唯一人員 ID，暫代與排除狀態已標記',
+        escalation: '同名無法區分、公司歸屬矛盾或新增別名未確認'
+      },
+      dedupe: {
+        name: '項目去重 Agent',
+        input: '歷史項目、周報月報及名稱相似的工作事件',
+        done: '同一項目只有一條主記錄，跨周月保留狀態變化',
+        escalation: '語意相近但範圍、負責人或時間無法支持合併'
+      },
+      contribution: {
+        name: '貢獻核驗 Agent',
+        input: '任務分工、提交、驗收、上線及業務結果證據',
+        done: '人員角色與實際交付都有可追溯的證據位置',
+        escalation: '確認表、周報與系統紀錄對貢獻角色描述不一致'
+      },
+      capability: {
+        name: '能力邊界 Agent',
+        input: '已確認交付、任務難度、支持程度與驗收品質',
+        done: '只更新被事實驗證的能力，並區分一次與穩定承擔',
+        escalation: '缺少驗收、支持程度不明或只有主觀能力描述'
+      },
+      potential: {
+        name: '潛力信號 Agent',
+        input: '多周期學習事件、獨立交付與跨場景遷移紀錄',
+        done: '輸出帶證據充分度的趨勢信號，不輸出最終人才等級',
+        escalation: '只有單次事件、負面敏感結論或資料周期不足'
+      },
+      audit: {
+        name: '獨立審核 Agent',
+        input: '所有專業 Agent 結果、證據索引與適用規則',
+        done: '每項結論都能追溯來源，衝突、缺證及規則偏差已列出',
+        escalation: '兩個 Agent 結論矛盾、規則版本錯誤或來源不可驗證'
+      },
+      output: {
+        name: '報告生成 Agent',
+        input: '已通過審核與人工確認的正式事實及管理待辦',
+        done: '評估表、變化摘要與爭議清單使用同一批次版本',
+        escalation: '正式輸出仍包含未解衝突、敏感內容或無證據結論'
+      }
+    };
+
+    const fields = {
+      kicker: document.querySelector('#detail-kicker'),
+      title: document.querySelector('#detail-title'),
+      copy: document.querySelector('#detail-copy'),
+      input: document.querySelector('#detail-input'),
+      output: document.querySelector('#detail-output'),
+      human: document.querySelector('#detail-human'),
+      control: document.querySelector('#detail-control')
+    };
+
+    const selectStage = (button) => {
+      document.querySelectorAll('.stage').forEach((item) => {
+        item.classList.remove('active');
+        item.setAttribute('aria-pressed', 'false');
+      });
+      button.classList.add('active');
+      button.setAttribute('aria-pressed', 'true');
+      const data = stages[button.dataset.stage];
+      Object.entries(fields).forEach(([key, node]) => node.textContent = data[key]);
+    };
+
+    document.querySelectorAll('.stage').forEach((button) => {
+      button.addEventListener('click', () => selectStage(button));
+      button.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          selectStage(button);
+        }
+      });
+    });
+
+    const specialistFields = {
+      current: document.querySelector('#specialist-current'),
+      input: document.querySelector('#specialist-input'),
+      done: document.querySelector('#specialist-done'),
+      escalation: document.querySelector('#specialist-escalation')
+    };
+
+    document.querySelectorAll('.specialist-node').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.specialist-node').forEach((item) => {
+          item.classList.remove('active');
+          item.setAttribute('aria-pressed', 'false');
+        });
+        button.classList.add('active');
+        button.setAttribute('aria-pressed', 'true');
+        const data = specialists[button.dataset.specialist];
+        specialistFields.current.textContent = `${data.name} · 接收任務`;
+        specialistFields.input.textContent = data.input;
+        specialistFields.done.textContent = data.done;
+        specialistFields.escalation.textContent = data.escalation;
+      });
+    });
+
+    document.querySelectorAll('.filter').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.filter').forEach((item) => item.setAttribute('aria-pressed', 'false'));
+        button.setAttribute('aria-pressed', 'true');
+        const selected = button.dataset.filter;
+        document.querySelectorAll('.mini-item').forEach((item) => {
+          const match = selected === 'all' || item.classList.contains(`path-${selected}`);
+          item.style.opacity = match ? '1' : '.2';
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+
+

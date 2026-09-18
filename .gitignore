@@ -1,0 +1,45 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Generated output and logs
+logs/
+tmp/
+output/
+exports/
+
+# Sensitive business and personnel data — never commit
+data/raw/
+data/private/
+uploads/
+reports/private/
+*.xlsx
+*.xls
+*.xlsm
+*.docx
+*.pdf
+*.csv
+*.tsv
+
+# Keep explicitly sanitized examples
+!examples/**/*.csv
+!examples/**/*.json
+
