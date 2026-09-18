@@ -35,6 +35,7 @@ flowchart LR
 ## 文档索引
 
 - [当前工作交接](docs/HANDOFF.md)
+- [运行第一阶段 Agent 与本地演示](docs/development/intake-mvp.md)
 - [系统架构](docs/architecture/system-architecture.md)
 - [Agent 分工与编排](docs/architecture/agent-orchestration.md)
 - [数据模型与事实账本](docs/architecture/data-model.md)
@@ -46,19 +47,22 @@ flowchart LR
 - [MVP 实施路线](docs/roadmap/mvp.md)
 - [互动式架构可视化](architecture-visualization/dist/index.html)
 
-## 规划中的代码结构
+## 代码与文档结构
 
 ```text
 app/
   api/                 # Telegram webhook、上传、回调与管理 API
-  supervisor/          # 总管状态机、任务依赖与异常升级
-  agents/              # 8 个专业 Agent
-  parsers/             # Excel、Word、HTML、PDF 解析
-  rules/               # 评估规则、证据等级与分流逻辑
-  services/            # 对象存储、通知、报告与 LLM Gateway
-  database/            # ORM、仓储层与交易边界
+  agents/collection.py # 第一阶段资料收集 Agent
+  supervisor.py        # 归档、版本、重复与异常路由
+  worker.py            # 异步下载、解析与通知执行
+  queue.py             # PostgreSQL 任务领取、租约与重试
+  parsers.py           # HTML、JSON、CSV、Excel、Word 解析
+  periods.py           # 日期／周次与正文期间检查
+  database.py          # 收件、来源、批次、任务与审计
+  storage.py           # 本地开发／生产 S3 存储
+  telegram.py          # Telegram HTTP 客户端
+  cli.py               # 本地演示与管理员状态查询
 migrations/            # 数据库迁移
-templates/             # 报告与输出模板
 tests/                 # 单元、集成与回归测试
 docs/                  # 架构、治理、部署与路线图
 architecture-visualization/
@@ -66,7 +70,9 @@ architecture-visualization/
 
 ## 目前状态
 
-当前版本完成架构与治理基线留存。建议下一步先实现“不自动给最终人才等级”的 MVP：文件接入、格式校验、身份归档、日期／周次核对、项目去重、事实账本、异常确认，以及周报／月报自动输出。
+第一阶段已可运行：Telegram 私聊收件、总管的收件归档流程、资料收集 Agent、数据库迁移、文件解析、日期／周次检查、版本与文件重复检查、状态通知及审计。可先用匿名示例在本地演示，无需 Bot Token 或大模型密钥。启动命令与限制见[开发说明](docs/development/intake-mvp.md)。
+
+目前停在 `NORMALIZED` 来源归档；提取文字仍是未核验资料。人员身份归档、项目语义去重、贡献核验、周月报生成及能力／潜力分析将按后续阶段实现。生产 Telegram 与 Railway 尚未连接。
 
 ## 跨电脑与跨 Agent 交接
 

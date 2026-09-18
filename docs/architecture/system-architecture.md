@@ -73,13 +73,15 @@ flowchart TB
 
 ## 4. 技术栈
 
-- Python 3.12、FastAPI、aiogram、Pydantic
+- Python 3.12、FastAPI、Pydantic；首版通过 httpx 调用 Telegram Bot API
 - SQLAlchemy、Alembic、PostgreSQL
 - boto3／S3-compatible API
 - openpyxl、pandas、python-docx、BeautifulSoup、pypdf
 - Anthropic／OpenAI 官方 SDK，经统一 LLM Gateway 调用
 - Jinja2、openpyxl／xlsxwriter 生成报告
 - Docker、pytest、GitHub Actions
+
+以上为完整目标技术栈。首版实际依赖与命令见 [可运行的资料收集流程](../development/intake-mvp.md)；暂不引入 LLM SDK、pandas、PDF 或报告生成依赖。专业 Agent 的第一阶段是受规则约束的确定性处理器。
 
 ## 5. 模型使用边界
 
@@ -93,4 +95,3 @@ flowchart TB
 | 最终人才等级与敏感处置 | 人工决定 |
 
 生产环境使用模型 API，不把 Claude CLI 当作运行时依赖。CLI 只适合开发、评审或一次性离线辅助。
-

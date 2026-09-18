@@ -1,0 +1,14 @@
+.git
+.venv
+.env*
+data
+uploads
+reports
+logs
+tmp
+output
+exports
+tests
+__pycache__
+*.db
+*.egg-info

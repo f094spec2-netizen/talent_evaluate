@@ -13,6 +13,12 @@ __pycache__/
 .ruff_cache/
 .venv/
 venv/
+*.egg-info/
+build/
+*.db
+*.db-*
+.coverage
+htmlcov/
 
 # Editors / OS
 .idea/
@@ -42,4 +48,3 @@ reports/private/
 # Keep explicitly sanitized examples
 !examples/**/*.csv
 !examples/**/*.json
-

@@ -1,12 +1,14 @@
 # Railway 一体化部署方案
 
+这是完整目标拓扑。第一阶段的实际镜像、服务命令、环境变量和迁移步骤以[资料收集开发说明](../development/intake-mvp.md)为准；当前只实现 API、worker、数据库和对象存储，尚未实现定时汇总与备份任务。
+
 ## 1. 部署拓扑
 
 ```mermaid
 flowchart LR
     TG[Telegram] -->|Webhook HTTPS| API[tg-api · Public]
     API -->|Private DNS| DB[(PostgreSQL)]
-    API -->|Private API| WORKER[agent-worker]
+    DB -->|任务队列| WORKER[agent-worker]
     API --> BUCKET[(Private Bucket)]
     WORKER --> DB
     WORKER --> BUCKET
@@ -21,7 +23,7 @@ flowchart LR
 各服务使用同一份代码和 Docker 镜像，通过不同启动命令区分角色：
 
 ```text
-tg-api         -> uvicorn app.api.main:app --host 0.0.0.0 --port $PORT
+tg-api         -> uvicorn app.api.main:create_app --factory --host 0.0.0.0 --port $PORT
 agent-worker   -> python -m app.worker
 weekly-cron    -> python -m app.scripts.enqueue_weekly
 monthly-cron   -> python -m app.scripts.enqueue_monthly
@@ -74,4 +76,3 @@ LOG_LEVEL
 - [ ] 备份已实际恢复验证
 - [ ] 生产仓库与 Railway 项目访问者名单已确认
 - [ ] 领导确认最终人才决策仍由人负责
-

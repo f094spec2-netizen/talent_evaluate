@@ -1,6 +1,6 @@
 # Project Handoff
 
-> Every push must update this file. Read it before starting work on any computer or with any coding agent.
+> Every push must update this file. Read it before starting on any computer or with any coding agent.
 
 ## Current snapshot
 
@@ -8,101 +8,87 @@
 |---|---|
 | Last updated | 2026-09-18, Asia/Singapore |
 | Updated by | Codex |
-| Repository | `f094spec2-netizen/talent_evaluate` |
-| Primary branch | `main` |
-| Current phase | Architecture and governance baseline |
-| Runtime status | No application runtime has been implemented yet |
-| Data policy | Public repository; anonymized architecture and examples only |
+| Repository / branch | f094spec2-netizen/talent_evaluate / main |
+| Current phase | Phase 1: executable collection Agent and intake supervisor |
+| Runtime status | Local anonymous demo verified; production services not provisioned |
+| Data policy | Public repository; anonymized examples only |
 
-## Project objective
+## Objective and boundaries
 
-Build an agent-based system for the efficiency center that reuses natural project records and submitted files to create a traceable fact ledger, weekly/monthly outputs, capability-boundary evidence, and potential signals. Telegram is the user entry point, Railway is the planned runtime platform, and humans retain final authority over talent grading and sensitive decisions.
+Reuse natural project records to create traceable weekly/monthly reporting and talent-assessment evidence. Telegram is the entry point; Railway is the planned host. Facts establish demonstrated capability, while potential remains an uncertain longitudinal signal. Humans retain final talent-grading authority.
 
-## Completed and stored
+This executable slice ends at NORMALIZED source intake. Extracted text is explicitly unverified_source, not verified personal contribution. There are no LLM calls or automatic grades.
 
-- Overall system architecture and planned Python technology stack.
-- Supervisor Agent responsibilities and eight specialist Agent contracts.
-- Batch state machine and green/yellow/red review routing.
-- Rolling fact-ledger data model and evidence model.
-- Talent-evaluation method and governance boundaries.
-- File naming, date/week verification, format, version, and duplicate rules.
-- Railway all-in-one deployment topology.
-- Security, privacy, access, backup, and LLM data-minimization rules.
-- MVP phases and suggested acceptance metrics.
-- An anonymized interactive HTML architecture visualization.
-- Repository-wide handoff workflow for Codex and Claude.
+## Completed and material changes in this push
 
-## Material changed in this handoff
+- Python 3.12 package, pinned dependencies, environment example, non-root Docker image, development PostgreSQL Compose service.
+- FastAPI Telegram webhook: shared-secret verification, account-to-company/officer binding, private-chat restriction, bounded request size, durable deduplicated updates.
+- Collection Agent: HTML/HTM, UTF-8 CSV/JSON, XLSX/XLSM and DOCX extraction, with source locators and bounded extraction. Macros/scripts/external links are not executed. Formula text is flagged rather than calculated.
+- Conservative filename/body date and ISO-week checks, explicit versions, receipt-versus-processing states, same-version conflicts and cross-period content-reuse flags.
+- Supervisor intake slice: normalize a source, retain versions, route unresolved issues to review, write audit events and enqueue a receipt notification.
+- PostgreSQL queue: unique jobs, row locks, expiring leases, stale-worker fencing, retry/backoff and terminal-failure state. SQLite supports single-worker local development.
+- Local/S3 content-addressed storage, atomic local writes and hash verification on read.
+- Telegram /help, /status, download client and completion notifications. No live Bot has been configured.
+- Alembic revision 0001: receipts, source files, source records, batches, jobs and audit events.
+- Local CLI ingest/status/jobs commands and an anonymous weekly HTML example.
+- Tests and CI with PostgreSQL 16 and Docker build.
+- README, deployment and upload documents distinguish implemented features from the full target architecture.
 
-- Added `AGENTS.md` as the authoritative cross-agent working rule.
-- Added `CLAUDE.md` as Claude's entry point to the shared rules.
-- Added this living `docs/HANDOFF.md` document.
-- Added a GitHub Actions check requiring every push to update this file.
-- Added a pull-request checklist and documented the repository workflow.
-
-## Key architecture decisions
-
-1. Telegram is an entry channel only; agents run in a Railway backend.
-2. Railway services are `tg-api`, `agent-worker`, PostgreSQL, a private bucket, and short-lived cron enqueue jobs.
-3. The first queue implementation uses PostgreSQL `agent_jobs`; Redis is deferred until measured demand justifies it.
-4. One codebase and one Docker image use different start commands for each service.
-5. Deterministic code handles validation, hashes, versions, dates, weeks, and state transitions.
-6. Large models handle constrained extraction and evidence-backed analysis through a central LLM Gateway.
-7. Agents return structured candidates and cannot directly modify official talent records.
-8. Final talent grades, sensitive negative conclusions, and major disputes remain human decisions.
-9. The initial MVP does not automatically assign final talent grades.
-
-Permanent details are in:
-
-- `docs/architecture/system-architecture.md`
-- `docs/architecture/agent-orchestration.md`
-- `docs/architecture/data-model.md`
-- `docs/governance/evaluation-method.md`
-- `docs/deployment/railway.md`
+Key code: app/api/main.py, app/agents/collection.py, app/supervisor.py, app/queue.py, app/worker.py, app/parsers.py, app/periods.py, app/storage.py, app/telegram.py, app/database.py.
 
 ## Validation completed
 
-- Verified all required architecture and governance files exist.
-- Compiled the inline JavaScript in the visualization without syntax errors.
-- Scanned committed content for the known real-person names from the source materials; none are present.
-- Confirmed the first architecture commit was pushed to `origin/main`.
-- Confirmed the handoff enforcement workflow completed successfully for commit `4d7ddea`.
-
-## Known constraints and risks
-
-- The GitHub repository is public. No real personnel data or original reports may be committed.
-- The implementation code, database migrations, Telegram bot, Railway services, and automated tests do not yet exist.
-- Exact Railway and model costs must be measured during the pilot.
-- Project-management systems used by each company have not yet been inventoried.
-- The final capability taxonomy, review thresholds, and retention periods still require business approval.
-
-## Recommended next actions
-
-1. Confirm the 2–3 pilot companies, business owner, and efficiency-center project owner.
-2. Inventory the project-management software and export/API capability used by each pilot company.
-3. Create the Python application skeleton, Docker image, migrations, and local development environment.
-4. Implement Telegram authentication and the file-ingestion pipeline first.
-5. Build the fact-ledger schema and deterministic date/week/version checks.
-6. Prepare anonymized golden test cases before adding LLM extraction.
+- Local Python 3.12: **37 passed, 2 skipped**. The skips are PostgreSQL concurrency tests, enabled in CI.
+- Ruff passed; Alembic upgrade and schema drift check passed; pip check passed.
+- Anonymous CLI demo normalized the sample, extracted 12 fragments, reconciled 2026-W35 with 2026-08-24 to 2026-08-30.
+- S3 and Telegram clients tested through stubs/mocked transports, not real services.
+- This computer's Docker engine is not running. PostgreSQL concurrency and container build await the GitHub Actions run after push.
+- Two upstream deprecation warnings from the Starlette TestClient/httpx compatibility path remain; tests pass.
 
 ## Clean-machine startup
 
-```powershell
-git clone https://github.com/f094spec2-netizen/talent_evaluate.git
-Set-Location talent_evaluate
-Get-Content .\AGENTS.md -Raw
-Get-Content .\docs\HANDOFF.md -Raw
-git status --short --branch
-git log --oneline -5
-```
+Read AGENTS.md, README.md and this file; fetch remote state and inspect the working tree before editing.
 
-No application installation command is available yet because the runtime has not been scaffolded. Add exact setup, test, migration, and launch commands here when implementation begins.
+Windows PowerShell, from the repository root:
 
-## Handoff completion checklist
+    py -3.12 -m venv .venv
+    .venv/Scripts/python.exe -m pip install -r requirements.txt -r requirements-dev.txt
+    .venv/Scripts/python.exe -m alembic upgrade head
+    .venv/Scripts/python.exe -m pytest -q
+    .venv/Scripts/python.exe -m uvicorn app.api.main:create_app --factory --host 127.0.0.1 --port 8000
 
-- [x] Current state is understandable without access to the previous chat.
-- [x] Permanent architecture documents are linked.
-- [x] Completed checks and remaining risks are stated.
-- [x] Next actions are concrete.
-- [x] No secrets or personnel data are included.
-- [x] GitHub Actions handoff check confirmed after push.
+Run .venv/Scripts/python.exe -m app.worker in a second terminal. On macOS/Linux use python3.12 for venv creation and .venv/bin/python thereafter. Demo commands, configuration and limits are in [the intake runbook](development/intake-mvp.md).
+
+Without .env, local development uses SQLite and storage under ignored data/private/. Webhook stays disabled until configured. Production requires PostgreSQL, shared S3, Bot token, webhook secret and account assignments. Never commit their values.
+
+## Known constraints and risks
+
+- ISO Monday–Sunday weeks are the pilot convention; legacy reporting calendars need confirmation. A filename-only date remains pending unless an explicit body period resolves it.
+- Body-period recognition covers labelled headers among the first 40 extracted fragments plus top-level JSON period fields. Arbitrary legacy formatting is not fully understood.
+- Missing identity prefix, version or period never silently becomes a confirmed source.
+- Current review resolution is correcting/re-uploading the file. No one-click confirmation endpoint yet.
+- A batch is one company/officer/type/period. New versions retain old ones; older late arrivals do not lower the current version.
+- Notifications are at-least-once and may duplicate after a crash, but do not duplicate source versions.
+- Not implemented: PDF, legacy XLS, images/OCR, full supervisor DAG, expected-submission inventory, personnel/project master data, semantic deduplication, verified facts, report generation and talent analysis.
+- No cloud deployment, live Telegram delivery or real S3 integration has occurred. Project-software inventory and business ownership need confirmation before pilot onboarding.
+
+## Recommended next actions
+
+1. Confirm this commit's CI result; repair failures before expanding functionality.
+2. Build identity master data and identity-archiving Agent with dated assignments and explicit alias conflicts.
+3. Add Telegram one-click review for ambiguous periods/identity and an audit-backed resolution service.
+4. Add project identity/deduplication and incremental work-event ledger using anonymous golden cases.
+5. Add constrained LLM Gateway when extraction/evidence tasks and validation sets are ready.
+6. When operator-owned Railway/Bot settings are available, deploy staging, test live delivery and onboard 2–3 pilot companies.
+
+## References
+
+- [Runtime runbook](development/intake-mvp.md)
+- [System architecture](architecture/system-architecture.md)
+- [Agent orchestration](architecture/agent-orchestration.md)
+- [Data model](architecture/data-model.md)
+- [Evaluation governance](governance/evaluation-method.md)
+- [Upload standard](governance/file-upload-standard.md)
+- [Railway plan](deployment/railway.md)
+
+The handoff CI check detects missing updates after a push. It does not itself reject Git pushes; branch protection is a separate repository setting.
