@@ -41,7 +41,8 @@ Migrations: 0001 -> 438e64fe6510 -> a3abf32246ec.
 - Playwright browser rehearsal in separate QA DB: login, select case, trial, inspect sources, approve QA-only gold, formal single-case rerun; incomplete suite correctly remains not passed. Desktop 1600 px and mobile 390 px inspected; no horizontal overflow at mobile width.
 - Ruff, schema drift check and pip check pass. Two upstream Starlette/httpx deprecation warnings remain.
 - No actual user gold approval or final browser sign-off yet. No live Telegram/S3 verification. Railway configurations have not been deployed.
-- Remote CI for this implementation must be checked after push; do not infer it from local results.
+- Implementation commit dd2ad12 passed [GitHub Actions](https://github.com/f094spec2-netizen/talent_evaluate/actions/runs/35313604240): **99 tests passed**, 36 public synthetic regression cases matched, schema drift check and Docker build passed. [Handoff check](https://github.com/f094spec2-netizen/talent_evaluate/actions/runs/35313604125) also passed.
+- Final browser follow-up fixes the selected answer version after approve/return: returning a new draft now keeps that version visible rather than jumping to a historical approved answer. Playwright verified v3 returned while v1 execution stayed unchanged, with no JavaScript console errors. This small UI follow-up does not change backend scoring.
 
 ## Exact startup and private state
 

@@ -57,7 +57,7 @@ function renderCases() {
   if (!state.cases.length) area.append(node('p', '尚未建立可執行案例。', 'empty'));
   state.cases.forEach(c => {const row = node('div', undefined, `case-row ${state.detail?.id === c.id ? 'active' : ''}`);const checkbox = node('input'); checkbox.type = 'checkbox'; checkbox.checked = state.selected.has(c.id); checkbox.setAttribute('aria-label', '勾選 ' + c.case_key); checkbox.addEventListener('change', () => checkbox.checked ? state.selected.add(c.id) : state.selected.delete(c.id)); const b = node('button', undefined, 'case-button'); b.append(node('small', `${c.case_key} · ${tracks[c.track]} · ${c.split === 'holdout' ? '保留' : '開發'}`), node('span', c.title), pill(`${statuses[c.answer_status]} · v${c.answer_version}`, c.answer_status === 'approved' ? 'good' : 'warn')); b.addEventListener('click', () => selectCase(c.id).catch(e => toast(e.message))); row.append(checkbox, b); area.append(row);});
 }
-async function selectCase(id) {
+async function selectCase(id, preferredAnswerId = null) {
   state.detail = await api(`/cases/${id}`); const c = state.detail;
   $('empty-detail').hidden = true; $('case-detail').hidden = false;
   $('case-title').textContent = c.title; $('case-meta').textContent = `${c.case_key} / ${tracks[c.track]} / ${c.split} / ${c.source_family}`;
@@ -66,6 +66,7 @@ async function selectCase(id) {
   c.task.files.forEach(file => {area.append(node('h4', file.filename)); if (/\.(html?|json|csv)$/i.test(file.filename)) {try {const bytes = Uint8Array.from(atob(file.content_base64), c => c.charCodeAt(0));area.append(node('pre', new TextDecoder().decode(bytes)));} catch {area.append(node('p', '無法預覽二進位內容'));}} else {area.append(node('p', `Office／二進位檔 · ${Math.floor(file.content_base64.length * .75)} bytes。解析後的內容與定位見右側證據。`, 'binary-note'));}});
   const version = clear('answer-version'); c.answers.slice().reverse().forEach(a => {const o = node('option', `v${a.version} · ${statuses[a.status]}`);o.value = a.id; version.append(o);});
   const result = currentResult(); if (result && c.answers.some(a => a.id === result.snapshot.answer_id)) version.value = result.snapshot.answer_id;
+  if (preferredAnswerId && c.answers.some(a => a.id === preferredAnswerId)) version.value = preferredAnswerId;
   renderAnswer(); renderActual(); renderCases();
 }
 function renderAnswer() {
@@ -97,7 +98,7 @@ function renderActual() {
 async function decide(decision) {
   const reason = $('decision-reason').value.trim(); if (reason.length < 3) throw new Error('請填寫至少 3 個字的核准／退回理由。');
   await post(`/answers/${state.gold.id}/decision`, {decision, reason});toast(decision === 'approve' ? '已核准答案；舊試跑不會追溯變成正式通過。' : '已退回；修訂時請建立新版本。');
-  await selectCase(state.detail.id);await overview();await loadCases();await loadAudit();
+  await selectCase(state.detail.id, state.gold.id);await overview();await loadCases();await loadAudit();
 }
 async function launch(ids) {
   const run = await post('/runs', {agent: state.agent, case_ids: ids, split: $('split').value, mode: $('mode').value, request_key: crypto.randomUUID()});
