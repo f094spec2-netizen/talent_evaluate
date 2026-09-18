@@ -1,0 +1,50 @@
+name: Require handoff update
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  handoff:
+    name: Handoff document updated
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine changed files
+        id: changes
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            base="$PR_BASE_SHA"
+          elif [[ -n "${PUSH_BEFORE:-}" && ! "$PUSH_BEFORE" =~ ^0+$ ]]; then
+            base="$PUSH_BEFORE"
+          else
+            base="$(git rev-list --max-parents=0 "$CURRENT_SHA")"
+          fi
+
+          git diff --name-only "$base" "$CURRENT_SHA" | tee changed-files.txt
+
+      - name: Require docs/HANDOFF.md in the pushed range
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! grep -Fxq 'docs/HANDOFF.md' changed-files.txt; then
+            echo 'Every push or pull request must update docs/HANDOFF.md.' >&2
+            exit 1
+          fi
+
+          echo 'Handoff update detected.'

@@ -34,12 +34,14 @@ flowchart LR
 
 ## 文档索引
 
+- [当前工作交接](docs/HANDOFF.md)
 - [系统架构](docs/architecture/system-architecture.md)
 - [Agent 分工与编排](docs/architecture/agent-orchestration.md)
 - [数据模型与事实账本](docs/architecture/data-model.md)
 - [人才评估方法与治理边界](docs/governance/evaluation-method.md)
 - [文件上传规范](docs/governance/file-upload-standard.md)
 - [安全、隐私与权限](docs/governance/security-and-privacy.md)
+- [仓库与跨电脑交接流程](docs/governance/repository-workflow.md)
 - [Railway 一体化部署](docs/deployment/railway.md)
 - [MVP 实施路线](docs/roadmap/mvp.md)
 - [互动式架构可视化](architecture-visualization/dist/index.html)
@@ -66,3 +68,6 @@ architecture-visualization/
 
 当前版本完成架构与治理基线留存。建议下一步先实现“不自动给最终人才等级”的 MVP：文件接入、格式校验、身份归档、日期／周次核对、项目去重、事实账本、异常确认，以及周报／月报自动输出。
 
+## 跨电脑与跨 Agent 交接
+
+每次推送都必须同步更新 `docs/HANDOFF.md`。Codex、Claude 或其他贡献者开始工作前，应先阅读 `AGENTS.md` 与当前交接文件；GitHub Actions 会检查每次推送是否包含交接更新。
