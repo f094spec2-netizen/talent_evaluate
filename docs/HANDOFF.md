@@ -66,7 +66,7 @@ Permanent details are in:
 - Compiled the inline JavaScript in the visualization without syntax errors.
 - Scanned committed content for the known real-person names from the source materials; none are present.
 - Confirmed the first architecture commit was pushed to `origin/main`.
-- The handoff enforcement workflow must be verified by GitHub Actions after this push.
+- Confirmed the handoff enforcement workflow completed successfully for commit `4d7ddea`.
 
 ## Known constraints and risks
 
@@ -105,4 +105,4 @@ No application installation command is available yet because the runtime has not
 - [x] Completed checks and remaining risks are stated.
 - [x] Next actions are concrete.
 - [x] No secrets or personnel data are included.
-- [ ] GitHub Actions handoff check confirmed after push.
+- [x] GitHub Actions handoff check confirmed after push.
