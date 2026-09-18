@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from hashlib import sha256
 
 from app.parsers import parse_file
 from app.periods import infer_period
 
-RULE_VERSION = "intake-2026-09-18.1"
+RULE_VERSION = "intake-2026-09-18.2"
 
 
 @dataclass
@@ -27,6 +28,7 @@ def collect(filename: str, content: bytes) -> CollectionResult:
             "warnings": warnings,
             "source_content_is_untrusted": True,
             "evidence_status": "unverified_source",
+            "source": {"filename": filename, "sha256": sha256(content).hexdigest()},
             **period,
             "recommended_route": "yellow" if period["issues"] else "green",
         },

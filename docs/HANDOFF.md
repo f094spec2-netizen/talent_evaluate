@@ -1,94 +1,94 @@
 # Project Handoff
 
-> Every push must update this file. Read it before starting on any computer or with any coding agent.
+> Every push must update this file. Read AGENTS.md, README.md and this file first on every computer.
 
 ## Current snapshot
 
 | Field | Value |
 |---|---|
-| Last updated | 2026-09-18, Asia/Singapore |
-| Updated by | Codex |
+| Updated | 2026-09-18, Asia/Singapore · Codex |
 | Repository / branch | f094spec2-netizen/talent_evaluate / main |
-| Current phase | Phase 1: executable collection Agent and intake supervisor |
-| Runtime status | Local anonymous demo verified; production services not provisioned |
-| Data policy | Public repository; anonymized examples only |
+| Phase | Browser business-acceptance workbench implemented; user approval pending |
+| Hosting | Loopback browser version running on development machine; Railway NOT provisioned |
+| User decision | No Railway account yet; complete the operable version first |
+| Privacy | Public repo/CI synthetic only; derived cases, mappings, credentials and runs private |
 
-## Objective and boundaries
+## Delivered in this change
 
-Reuse natural project records to create traceable weekly/monthly reporting and talent-assessment evidence. Telegram is the entry point; Railway is the planned host. Facts establish demonstrated capability, while potential remains an uncertain longitudinal signal. Humans retain final talent-grading authority.
+- FastAPI acceptance service and responsive Chinese UI: nine-agent catalog, case selection, trial/formal execution, side-by-side evidence/expected/actual/diffs, approve/return, new answer versions, result adjudication, run comparison, audit trail and private exports.
+- Real adapters for collection and supervisor **intake slice only**. Seven future agents remain non-executable; contracts/specifications are in the catalog and dedicated document. Full supervisor DAG is not implemented.
+- Single admin login, scrypt verification, HttpOnly/SameSite cookies (Secure in production), CSRF/origin checks, bounded requests, rate-limited failed login, password-rotation invalidation, CSP and text-only evidence rendering.
+- Immutable case/answer revisions and run snapshots, per-track scoring, required-case denominators, no automatic gold approval, no all-defer/subset/error false pass, manual adjudication cannot erase critical failures.
+- Existing database queue reused with isolated job kinds, fenced execution and visible exhausted jobs. Fresh temporary intake database/object directory for each supervisor scenario; no business DB pollution.
+- Source commit/hash, Python/dependency versions, rules/scorer/dataset/answer versions and downloadable content-addressed code ZIP. Earliest development baselines predate ZIP capture and remain hash-only.
+- 36 public synthetic cases: 12 standard collection + 12 anomalies + 12 supervisor. Another 12 historical HTML cases prepared and imported into the originating machine's PRIVATE case store (not in Git). Latest total is 48; old revisions remain retained.
+- Source-family partition enforcement, independent synthetic source namespaces, deterministic Office ZIP bytes and private structural deidentification helper.
+- Real historical baseline exposed four period-recognition failures. Parser now handles labelled legacy statistics/coverage periods while retaining non-ISO/conflict escalation and evidence locators.
+- One draft completeness oracle was corrected after directly counting nonblank source lines; old case/failed run retained. This was an oracle correction, not proof of agent improvement. All latest business answers remain unapproved.
+- Railway API/worker config files prepared; acceptance production settings do not require Telegram credentials. NO cloud resources, paid services or live integration were created.
+- CI keeps original engineering tests and adds public synthetic regression with a non-sensitive summary artifact.
 
-This executable slice ends at NORMALIZED source intake. Extracted text is explicitly unverified_source, not verified personal contribution. There are no LLM calls or automatic grades.
+Key modules: app/acceptance/{api,service,scoring,adapters,worker,fixtures,private_cases,cli,contracts}.py and static/.
+Other changes: database models, queue kind filtering, settings, collection/period rules, package-data, CI, deployment configs.
+Migrations: 0001 -> 438e64fe6510 -> a3abf32246ec.
 
-## Completed and material changes in this push
+## Validation and current evidence
 
-- Python 3.12 package, pinned dependencies, environment example, non-root Docker image, development PostgreSQL Compose service.
-- FastAPI Telegram webhook: shared-secret verification, account-to-company/officer binding, private-chat restriction, bounded request size, durable deduplicated updates.
-- Collection Agent: HTML/HTM, UTF-8 CSV/JSON, XLSX/XLSM and DOCX extraction, with source locators and bounded extraction. Macros/scripts/external links are not executed. Formula text is flagged rather than calculated.
-- Conservative filename/body date and ISO-week checks, explicit versions, receipt-versus-processing states, same-version conflicts and cross-period content-reuse flags.
-- Supervisor intake slice: normalize a source, retain versions, route unresolved issues to review, write audit events and enqueue a receipt notification.
-- PostgreSQL queue: unique jobs, row locks, expiring leases, stale-worker fencing, retry/backoff and terminal-failure state. SQLite supports single-worker local development.
-- Local/S3 content-addressed storage, atomic local writes and hash verification on read.
-- Telegram /help, /status, download client and completion notifications. No live Bot has been configured.
-- Alembic revision 0001: receipts, source files, source records, batches, jobs and audit events.
-- Local CLI ingest/status/jobs commands and an anonymous weekly HTML example.
-- Tests and CI with PostgreSQL 16 and Docker build.
-- README, deployment and upload documents distinguish implemented features from the full target architecture.
+- Local Python 3.12: **97 passed, 2 skipped** (PostgreSQL-only tests run in CI). Original 39 engineering tests retained.
+- Public business regression: **36/36 match draft gold**, isolated regression database; NOT formal business acceptance.
+- Latest private + public trial: **48/48 match draft gold**, zero critical differences, evidence checks satisfied. This is a small rule-engine baseline, NOT verified generalization or user-approved capability.
+- Baseline stages retained: four real legacy-format failures before parser fix; development rerun; held-out run revealing one incorrect draft line-count expectation; revised case; full trial. Do not delete those records to manufacture a green history.
+- Playwright browser rehearsal in separate QA DB: login, select case, trial, inspect sources, approve QA-only gold, formal single-case rerun; incomplete suite correctly remains not passed. Desktop 1600 px and mobile 390 px inspected; no horizontal overflow at mobile width.
+- Ruff, schema drift check and pip check pass. Two upstream Starlette/httpx deprecation warnings remain.
+- No actual user gold approval or final browser sign-off yet. No live Telegram/S3 verification. Railway configurations have not been deployed.
+- Remote CI for this implementation must be checked after push; do not infer it from local results.
 
-Key code: app/api/main.py, app/agents/collection.py, app/supervisor.py, app/queue.py, app/worker.py, app/parsers.py, app/periods.py, app/storage.py, app/telegram.py, app/database.py.
+## Exact startup and private state
 
-## Validation completed
+Windows developer command after installing pinned dependencies:
 
-- Local Python 3.12: **37 passed, 2 skipped**. The skips are PostgreSQL concurrency tests, enabled in CI.
-- Ruff passed; Alembic upgrade and schema drift check passed; pip check passed.
-- Anonymous CLI demo normalized the sample, extracted 12 fragments, reconciled 2026-W35 with 2026-08-24 to 2026-08-30.
-- S3 and Telegram clients tested through stubs/mocked transports, not real services.
-- GitHub Actions verified implementation commit f7aa88a: **39 tests passed**, including PostgreSQL concurrency. Migration drift checks and the non-root Docker image build passed. [Backend run](https://github.com/f094spec2-netizen/talent_evaluate/actions/runs/35308705045) and [handoff check](https://github.com/f094spec2-netizen/talent_evaluate/actions/runs/35308705046) succeeded.
-- This final documentation update records the validated implementation and the next handoff point; it does not change runtime behavior.
-- Two upstream deprecation warnings from the Starlette TestClient/httpx compatibility path remain; tests pass.
+    .venv/Scripts/python.exe -m app.acceptance.cli serve
 
-## Clean-machine startup
+This migrates, seeds public drafts and serves http://127.0.0.1:8765 with an embedded local queue worker.
+Login credentials: ignored data/private/acceptance/local-access.json.
+Database: ignored data/private/acceptance/workbench.db.
+Private source manifest, derived cases and mappings: same private directory; **do not commit or publish**.
+Raw source reports remain untouched outside the repo.
+Browser QA: serve --qa --port 8766, isolated data/private/acceptance-qa/.
+Public regression: public-regression --file output/public-acceptance-baseline.json, isolated data/private/public-regression/.
 
-Read AGENTS.md, README.md and this file; fetch remote state and inspect the working tree before editing.
+These loopback services are not installed as auto-start Windows services. A reboot requires a developer restart; the user need not install software or run commands.
+Other computers receive only public cases from Git. Transfer private DB/exports and maps through an approved private channel if needed; never use repo/CI attachments.
 
-Windows PowerShell, from the repository root:
+## Version and storage details
 
-    py -3.12 -m venv .venv
-    .venv/Scripts/python.exe -m pip install -r requirements.txt -r requirements-dev.txt
-    .venv/Scripts/python.exe -m alembic upgrade head
-    .venv/Scripts/python.exe -m pytest -q
-    .venv/Scripts/python.exe -m uvicorn app.api.main:create_app --factory --host 127.0.0.1 --port 8000
+- Collection rules: intake-2026-09-18.2.
+- Acceptance contract: acceptance-2026-09-18.1; scorer: exact-evidence-2.
+- Public case revision 3 namespaces synthetic sources; historical current revision 2 preserves doctype and corrects the draft line-count case.
+- Answers are draft unless the actual administrator decides otherwise. QA approvals must not migrate to business acceptance.
+- First-stage case bytes and code ZIPs are stored in private SQL tables. Evaluation S3 credentials/bucket are reserved for later large attachments; current business fixtures do not validate live S3.
+- Full approval is per whole required suite and each format track. UI success does not automatically deploy or enable another agent.
+- No LLM adapter: future model integration must require three same-set repeat runs, model/prompt versions and independent human rubric. Do not treat the current single deterministic run as an LLM acceptance.
+- Source hash changes while queued cause a visible version failure; restart API/worker after changing code and create a new run. Do not keep old in-memory code serving a newly edited tree.
+- SQLite is local single-worker only. Cloud requires PostgreSQL and separate API/worker. Individual adapter calls must finish within the lease; long LLM work needs heartbeat/timeout additions.
 
-Run .venv/Scripts/python.exe -m app.worker in a second terminal. On macOS/Linux use python3.12 for venv creation and .venv/bin/python thereafter. Demo commands, configuration and limits are in [the intake runbook](development/intake-mvp.md).
+## Next actions
 
-Without .env, local development uses SQLite and storage under ignored data/private/. Webhook stays disabled until configured. Production requires PostgreSQL, shared S3, Bot token, webhook secret and account assignments. Never commit their values.
-
-## Known constraints and risks
-
-- ISO Monday–Sunday weeks are the pilot convention; legacy reporting calendars need confirmation. A filename-only date remains pending unless an explicit body period resolves it.
-- Body-period recognition covers labelled headers among the first 40 extracted fragments plus top-level JSON period fields. Arbitrary legacy formatting is not fully understood.
-- Missing identity prefix, version or period never silently becomes a confirmed source.
-- Current review resolution is correcting/re-uploading the file. No one-click confirmation endpoint yet.
-- A batch is one company/officer/type/period. New versions retain old ones; older late arrivals do not lower the current version.
-- Notifications are at-least-once and may duplicate after a crash, but do not duplicate source versions.
-- Not implemented: PDF, legacy XLS, images/OCR, full supervisor DAG, expected-submission inventory, personnel/project master data, semantic deduplication, verified facts, report generation and talent analysis.
-- No cloud deployment, live Telegram delivery or real S3 integration has occurred. Project-software inventory and business ownership need confirmation before pilot onboarding.
-
-## Recommended next actions
-
-1. Build identity master data and identity-archiving Agent with dated assignments and explicit alias conflicts.
-2. Add Telegram one-click review for ambiguous periods/identity and an audit-backed resolution service.
-3. Add project identity/deduplication and incremental work-event ledger using anonymous golden cases.
-4. Add constrained LLM Gateway when extraction/evidence tasks and validation sets are ready.
-5. When operator-owned Railway/Bot settings are available, deploy staging, test live delivery and onboard 2–3 pilot companies.
+1. Let the user open the local workbench, inspect gold and complete their own select/run/check/approve/rerun operation. Do not approve on their behalf.
+2. Review the 12 private historical cases and the explicit supplemental metadata assumptions before approving.
+3. When the user has a Railway account, provision an isolated evaluation environment, database and bucket; configure admin password privately and deploy the two checked-in service configurations. Do not touch business production.
+4. Import only privately reviewed derived cases; do not import raw reports/mappings into the web app. Verify HTTPS cookies, authorization, worker recovery and version alignment before giving a cloud URL.
+5. Add identity archiving next only after its source-grouped cases and gold are reviewed. Maintain evidence/claims boundaries, not automatic personnel grades.
+6. Expand previously unseen holdout families before any LLM release; the exercised set is now a regression set.
 
 ## References
 
-- [Runtime runbook](development/intake-mvp.md)
-- [System architecture](architecture/system-architecture.md)
-- [Agent orchestration](architecture/agent-orchestration.md)
-- [Data model](architecture/data-model.md)
-- [Evaluation governance](governance/evaluation-method.md)
-- [Upload standard](governance/file-upload-standard.md)
+- [Acceptance runbook](development/acceptance-lab.md)
+- [Future agent contracts](development/future-agent-acceptance.md)
+- [Original intake runbook](development/intake-mvp.md)
 - [Railway plan](deployment/railway.md)
+- [Evaluation governance](governance/evaluation-method.md)
+- [Security/privacy](governance/security-and-privacy.md)
+- [Repository workflow](governance/repository-workflow.md)
 
-The handoff CI check detects missing updates after a push. It does not itself reject Git pushes; branch protection is a separate repository setting.
+The handoff workflow detects missing updates after pushes; branch protection remains a separate setting.

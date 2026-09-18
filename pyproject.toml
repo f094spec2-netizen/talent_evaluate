@@ -20,6 +20,9 @@ dev = ["pytest>=8,<10", "ruff>=0.11,<1"]
 [tool.setuptools.packages.find]
 include = ["app*"]
 
+[tool.setuptools.package-data]
+"app.acceptance" = ["static/*.html", "static/*.css", "static/*.js"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 

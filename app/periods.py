@@ -44,6 +44,7 @@ def infer_period(filename: str, records: list[dict]) -> dict:
 
     # Only explicitly labelled headers are considered; dates in task rows are not report dates.
     body_ranges = []
+    period_evidence = []
     for record in records[:40]:
         text = record["text"]
         if record.get("locator") in ("json:/period", "json:/reporting_period"):
@@ -51,15 +52,20 @@ def infer_period(filename: str, records: list[dict]) -> dict:
             period = value.get("period", value.get("reporting_period"))
             if isinstance(period, dict):
                 text = f"Reporting period: {period.get('start_date', '')} to {period.get('end_date', '')}"
-        if re.match(
-            r"^\s*(?:报告期间|報告期間|统计期间|統計期間|报告周期|報告週期|reporting period)\s*[:：]",
-            text,
+        label = re.search(
+            r"(?:报告期间|報告期間|统计期间|統計期間|报告周期|報告週期|统计周期|統計週期|覆盖周期|覆蓋週期|reporting period)\s*[:：]",
+            text[:120],
             re.I,
-        ):
-            dates, errors = parse_dates(text)
+        )
+        if label:
+            # Legacy headers may be nested in a 'supplement' field. Stop before unrelated
+            # task dates or a parenthetical actual-diary cutoff, never expand a partial week.
+            segment = re.split(r"\s+[|/]\s+|[（(]", text[label.end():], maxsplit=1)[0]
+            dates, errors = parse_dates(segment)
             issues.extend(errors)
             if len(dates) == 2:
                 body_ranges.append((dates[0], dates[1]))
+                period_evidence.append({"locator": record.get("locator"), "quote": text[label.start():label.end()] + segment})
             else:
                 issues.append("BODY_PERIOD_UNREADABLE")
     body_ranges = list(dict.fromkeys(body_ranges))
@@ -145,5 +151,6 @@ def infer_period(filename: str, records: list[dict]) -> dict:
         "period_basis": basis,
         "filename_period": [d.isoformat() for d in file_range] if file_range else None,
         "body_period": [d.isoformat() for d in body_range] if body_range else None,
+        "period_evidence": period_evidence,
         "issues": sorted(set(issues)),
     }

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def run_once(sessions, settings, storage, telegram) -> bool:
-    lease = claim(sessions, settings.job_lease_seconds)
+    lease = claim(sessions, settings.job_lease_seconds, ("command", "notify", "download", "collect"))
     if lease is None:
         return False
     try:

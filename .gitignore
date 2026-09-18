@@ -30,6 +30,8 @@ Thumbs.db
 logs/
 tmp/
 output/
+.playwright-mcp/
+.playwright-cli/
 exports/
 
 # Sensitive business and personnel data — never commit

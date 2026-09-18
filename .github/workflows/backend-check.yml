@@ -34,4 +34,12 @@ jobs:
       - run: alembic upgrade head
       - run: alembic check
       - run: python -m pytest -q
+      - name: Public synthetic business regression (never private cases)
+        run: python -m app.acceptance.cli public-regression --file output/public-acceptance-baseline.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: public-synthetic-regression
+          path: output/public-acceptance-baseline.json
+          if-no-files-found: ignore
       - run: docker build -t talent-intake-test .

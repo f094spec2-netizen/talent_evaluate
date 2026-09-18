@@ -14,6 +14,9 @@ class Account(BaseModel):
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
     app_env: Literal["development", "test", "production"] = "development"
+    service_mode: Literal["intake", "acceptance"] = "intake"
+    acceptance_admin_password: SecretStr = SecretStr("")
+    acceptance_embedded_worker: bool = False
     database_url: str = "sqlite:///./data/private/talent.db"
     storage_backend: Literal["local", "s3"] = "local"
     local_storage_path: Path = Path("data/private/objects")
@@ -56,10 +59,15 @@ class Settings(BaseSettings):
                 raise ValueError("Production requires PostgreSQL")
             if self.storage_backend != "s3":
                 raise ValueError("Production requires shared S3 storage")
-            if (
+            if self.service_mode == "intake" and (
                 not secret
                 or not self.telegram_bot_token.get_secret_value()
                 or not self.telegram_accounts
             ):
                 raise ValueError("Production requires Telegram credentials and account assignments")
+        if self.service_mode == "acceptance":
+            if len(self.acceptance_admin_password.get_secret_value()) < 16:
+                raise ValueError("Acceptance requires a separate admin password of at least 16 characters")
+            if self.app_env == "production" and self.acceptance_embedded_worker:
+                raise ValueError("Production acceptance must use a separate queue worker")
         return self

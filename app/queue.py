@@ -10,6 +10,16 @@ MAX_ATTEMPTS = 3
 
 def terminal_failure(session, job, code):
     job.state, job.error_code, job.lease_token = "failed", code, None
+    if job.kind == "acceptance_run":
+        from app.database import AcceptanceResult, AcceptanceRun
+
+        run = session.get(AcceptanceRun, job.payload["run_id"])
+        if run:
+            run.state, run.finished_at = "failed", time.time()
+            for result in session.scalars(select(AcceptanceResult).where(
+                AcceptanceResult.run_id == run.id, AcceptanceResult.state != "completed"
+            )):
+                result.state, result.error_code = "failed", code
     receipt_id = job.payload.get("receipt_id")
     if receipt_id:
         receipt = session.get(Receipt, receipt_id)
@@ -44,12 +54,14 @@ class Lease:
     payload: dict
 
 
-def claim(sessions, lease_seconds: int) -> Lease | None:
+def claim(sessions, lease_seconds: int, kinds: tuple[str, ...] | None = None) -> Lease | None:
     now = time.time()
     eligible = or_(
         and_(Job.state == "queued", Job.available_at <= now),
         and_(Job.state == "running", Job.lease_until <= now),
     )
+    if kinds is not None:
+        eligible = and_(eligible, Job.kind.in_(kinds))
     with sessions.begin() as session:
         # A crashed final attempt must become visible as a failed job.
         exhausted = session.scalars(

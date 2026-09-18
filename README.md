@@ -35,6 +35,8 @@ flowchart LR
 ## 文档索引
 
 - [当前工作交接](docs/HANDOFF.md)
+- [Agent 能力驗收台：操作與開發部署](docs/development/acceptance-lab.md)
+- [後續七個 Agent 的驗收契約](docs/development/future-agent-acceptance.md)
 - [运行第一阶段 Agent 与本地演示](docs/development/intake-mvp.md)
 - [系统架构](docs/architecture/system-architecture.md)
 - [Agent 分工与编排](docs/architecture/agent-orchestration.md)
@@ -69,6 +71,8 @@ architecture-visualization/
 ```
 
 ## 目前状态
+
+新增瀏覽器能力驗收台：資料收集與總管收件切片可試跑，並排查看輸入／標準答案／實際結果，核准或退回答案、版本比較、私有執行快照及稽核。公開倉庫只有 36 個合成案例；12 個真實材料衍生的歷史格式案例留在本地私有庫。工程測試與業務驗收分開，答案未核准不能標示達標。詳見[驗收台說明](docs/development/acceptance-lab.md)。Railway 尚未部署。
 
 第一阶段已可运行：Telegram 私聊收件、总管的收件归档流程、资料收集 Agent、数据库迁移、文件解析、日期／周次检查、版本与文件重复检查、状态通知及审计。可先用匿名示例在本地演示，无需 Bot Token 或大模型密钥。启动命令与限制见[开发说明](docs/development/intake-mvp.md)。
 

@@ -9,6 +9,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    LargeBinary,
     String,
     Text,
     UniqueConstraint,
@@ -103,6 +104,95 @@ class AuditEvent(Base):
     action: Mapped[str] = mapped_column(String(60))
     details: Mapped[dict] = mapped_column(JSON, default=dict)
     created_at: Mapped[float] = mapped_column(Float, default=time.time)
+
+
+class AcceptanceCase(Base):
+    __tablename__ = "acceptance_cases"
+    __table_args__ = (UniqueConstraint("case_key", "revision", name="uq_case_revision"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    case_key: Mapped[str] = mapped_column(String(80), index=True)
+    revision: Mapped[int] = mapped_column(Integer, default=1)
+    agent: Mapped[str] = mapped_column(String(40), index=True)
+    track: Mapped[str] = mapped_column(String(40))
+    source_family: Mapped[str] = mapped_column(String(100), index=True)
+    split: Mapped[str] = mapped_column(String(20))
+    title: Mapped[str] = mapped_column(String(255))
+    visibility: Mapped[str] = mapped_column(String(20))
+    task: Mapped[dict] = mapped_column(JSON)
+    provenance: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[float] = mapped_column(Float, default=time.time)
+
+
+class GoldAnswer(Base):
+    __tablename__ = "acceptance_answers"
+    __table_args__ = (UniqueConstraint("case_id", "version", name="uq_answer_version"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    case_id: Mapped[str] = mapped_column(ForeignKey("acceptance_cases.id"), index=True)
+    version: Mapped[int] = mapped_column(Integer)
+    answer: Mapped[dict] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(20), default="draft")
+    created_at: Mapped[float] = mapped_column(Float, default=time.time)
+
+
+class AcceptanceRun(Base):
+    __tablename__ = "acceptance_runs"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    request_key: Mapped[str] = mapped_column(String(100), unique=True)
+    agent: Mapped[str] = mapped_column(String(40), index=True)
+    mode: Mapped[str] = mapped_column(String(20))
+    split: Mapped[str] = mapped_column(String(20))
+    state: Mapped[str] = mapped_column(String(20), default="queued")
+    manifest: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[float] = mapped_column(Float, default=time.time)
+    finished_at: Mapped[float | None] = mapped_column(Float)
+
+
+class AcceptanceResult(Base):
+    __tablename__ = "acceptance_results"
+    __table_args__ = (UniqueConstraint("run_id", "case_id", name="uq_run_case"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    run_id: Mapped[str] = mapped_column(ForeignKey("acceptance_runs.id"), index=True)
+    case_id: Mapped[str] = mapped_column(ForeignKey("acceptance_cases.id"))
+    snapshot: Mapped[dict] = mapped_column(JSON)
+    state: Mapped[str] = mapped_column(String(20), default="queued")
+    actual: Mapped[dict] = mapped_column(JSON, default=dict)
+    score: Mapped[dict] = mapped_column(JSON, default=dict)
+    error_code: Mapped[str | None] = mapped_column(String(80))
+    finished_at: Mapped[float | None] = mapped_column(Float)
+
+
+class AcceptanceAudit(Base):
+    __tablename__ = "acceptance_audits"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    actor: Mapped[str] = mapped_column(String(80))
+    action: Mapped[str] = mapped_column(String(50), index=True)
+    target_id: Mapped[str] = mapped_column(String(100), index=True)
+    details: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[float] = mapped_column(Float, default=time.time)
+
+
+class AcceptanceSession(Base):
+    __tablename__ = "acceptance_sessions"
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    csrf: Mapped[str] = mapped_column(String(80))
+    expires_at: Mapped[float] = mapped_column(Float)
+
+
+class Adjudication(Base):
+    __tablename__ = "acceptance_adjudications"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uid)
+    result_id: Mapped[str] = mapped_column(ForeignKey("acceptance_results.id"), index=True)
+    actor: Mapped[str] = mapped_column(String(80))
+    decision: Mapped[str] = mapped_column(String(20))
+    reason: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[float] = mapped_column(Float, default=time.time)
+
+
+class AcceptanceArtifact(Base):
+    __tablename__ = "acceptance_artifacts"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    content: Mapped[bytes] = mapped_column(LargeBinary)
+    media_type: Mapped[str] = mapped_column(String(80))
 
 
 def create_database(url: str):
