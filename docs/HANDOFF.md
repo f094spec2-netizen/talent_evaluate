@@ -42,7 +42,8 @@ Key code: app/api/main.py, app/agents/collection.py, app/supervisor.py, app/queu
 - Ruff passed; Alembic upgrade and schema drift check passed; pip check passed.
 - Anonymous CLI demo normalized the sample, extracted 12 fragments, reconciled 2026-W35 with 2026-08-24 to 2026-08-30.
 - S3 and Telegram clients tested through stubs/mocked transports, not real services.
-- This computer's Docker engine is not running. PostgreSQL concurrency and container build await the GitHub Actions run after push.
+- GitHub Actions verified implementation commit f7aa88a: **39 tests passed**, including PostgreSQL concurrency. Migration drift checks and the non-root Docker image build passed. [Backend run](https://github.com/f094spec2-netizen/talent_evaluate/actions/runs/35308705045) and [handoff check](https://github.com/f094spec2-netizen/talent_evaluate/actions/runs/35308705046) succeeded.
+- This final documentation update records the validated implementation and the next handoff point; it does not change runtime behavior.
 - Two upstream deprecation warnings from the Starlette TestClient/httpx compatibility path remain; tests pass.
 
 ## Clean-machine startup
@@ -74,12 +75,11 @@ Without .env, local development uses SQLite and storage under ignored data/priva
 
 ## Recommended next actions
 
-1. Confirm this commit's CI result; repair failures before expanding functionality.
-2. Build identity master data and identity-archiving Agent with dated assignments and explicit alias conflicts.
-3. Add Telegram one-click review for ambiguous periods/identity and an audit-backed resolution service.
-4. Add project identity/deduplication and incremental work-event ledger using anonymous golden cases.
-5. Add constrained LLM Gateway when extraction/evidence tasks and validation sets are ready.
-6. When operator-owned Railway/Bot settings are available, deploy staging, test live delivery and onboard 2–3 pilot companies.
+1. Build identity master data and identity-archiving Agent with dated assignments and explicit alias conflicts.
+2. Add Telegram one-click review for ambiguous periods/identity and an audit-backed resolution service.
+3. Add project identity/deduplication and incremental work-event ledger using anonymous golden cases.
+4. Add constrained LLM Gateway when extraction/evidence tasks and validation sets are ready.
+5. When operator-owned Railway/Bot settings are available, deploy staging, test live delivery and onboard 2–3 pilot companies.
 
 ## References
 
